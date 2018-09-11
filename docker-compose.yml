@@ -1,0 +1,40 @@
+version: "2"
+services:
+  
+  mariadb:
+    image: "mariadb:latest"
+    restart: always
+    container_name: rajainv-mariadb
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATA_BASE: rajainv
+      MYSQL_USER: rajainv
+      MYSQL_PASSWORD: rajainv-pass
+      MYSQL_ROOT_PASSWORD: rajainv-pass
+    volumes:
+      - ./dump:/docker-entrypoint-initdb.d
+      - persistent:/var/lib/mysql
+    networks:
+      - default
+
+  phpmyadmin:
+    image: "phpmyadmin/phpmyadmin"
+    container_name: rajainv-phpmyadmin
+    restart: always
+    links: 
+      - mariadb:db
+    ports:
+      - 8000:80
+    environment:
+      MYSQL_USER: rajainv
+      MYSQL_PASSWORD: rajainv-pass
+      MYSQL_ROOT_PASSWORD: rajainv-pass
+
+  # redis:
+  #   image: "redis:alpine"
+  #   container_name: "laluna-redis"
+  #   ports:
+  #     - "6379:6379"
+volumes:
+  persistent:

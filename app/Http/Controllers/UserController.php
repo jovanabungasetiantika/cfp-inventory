@@ -1,0 +1,214 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Validator;
+
+class UserController extends Controller
+{
+    /**
+     * login api
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function login(Request $request)
+    {
+        $field = filter_var($request->email, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+        if (Auth::attempt([$field => $request->email, 'password' => $request->password])) {
+            $user = Auth::user();
+            $token = $user->createToken('rajainv');
+            $success['token'] = [
+                'accessToken' => $token->accessToken,
+                'created_at' => $token->token->created_at,
+                'expires_at' => $token->token->expires_at,
+            ];
+            $success['user'] = $user;
+            return response()->json($success, 200);
+        } else {
+            return response()->json(['error' => 'Your password not match'], 401);
+        }
+    }
+
+    /**
+     * Register api
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function register(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+            'username' => 'required|unique:users,username',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required',
+            'c_password' => 'required|same:password',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+        $input = $request->all();
+        $input['password'] = bcrypt($input['password']);
+        $user = User::create($input);
+        $token = $user->createToken('rajainv');
+        $success['token'] = [
+            'accessToken' => $token->accessToken,
+            'created_at' => $token->token->created_at,
+            'expires_at' => $token->token->expires_at,
+        ];
+        $success['user'] = $user;
+        return response()->json($success, 200);
+    }
+
+    /**
+     * details api
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function details()
+    {
+        $user = Auth::user();
+        if ($user) {
+            return response()->json($user, 200);
+        } else {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+    }
+
+    /**
+     * logout api
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function logout()
+    {
+        $user = Auth::user();
+        if ($user) {
+            Auth::logout();
+            return response()->json(['message' => 'Logout success'], 200);
+        } else {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+    }
+
+    /**
+     * Register Change Password
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function changePassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'oldPassword' => 'required',
+            'password' => 'required',
+            'confirmPassword' => 'required|same:password',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+        $input = $request->all();
+        $input['password'] = bcrypt($input['password']);
+        $user = Auth::user();
+
+        $user->password = $input['password'];
+        $user->save();
+
+        return response()->json(['message' => 'Password changed successfully'], 200);
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        return response()->json(User::paginate(), 200);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        // $User = new User;
+        // $User->name = $request->name;
+        // $User->save();
+
+        // return response()->json($User, 201);
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  \App\User  $User
+     * @return \Illuminate\Http\Response
+     */
+    public function show(User $User)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  \App\User  $User
+     * @return \Illuminate\Http\Response
+     */
+    public function edit(User $User)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\User  $User
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, User $user)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+            'email' => 'required|email',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->save();
+        return response()->json($user, 200);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\User  $User
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(User $User)
+    {
+        $User->delete();
+
+        return response()->json([
+            'message' => 'Data has been deleted successfully',
+        ], 200);
+    }
+}
