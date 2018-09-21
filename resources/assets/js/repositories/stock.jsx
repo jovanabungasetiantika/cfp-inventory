@@ -4,6 +4,7 @@ import {
   fetchPost,
   fetchPatch,
   fetchDelete,
+  fetchDownload,
 } from '../actions/fetch'
 import {
   STOCK_LIST,
@@ -26,6 +27,12 @@ import {
   STOCK_DELETE_LIST_FAIL,
   STOCK_CLEAN_FAIL,
   STOCK_CLEAN_SUCCESS,
+  STOCK_REPORT_LIST,
+  STOCK_REPORT_LIST_FAIL,
+  STOCK_REPORT_LIST_SUCCESS,
+  STOCK_REPORT_DETAIL,
+  STOCK_REPORT_DETAIL_FAIL,
+  STOCK_REPORT_DETAIL_SUCCESS,
 } from '../constants/stock'
 
 const stockListsType = [
@@ -34,9 +41,46 @@ const stockListsType = [
   STOCK_LIST_FAIL,
 ]
 
-export const stockIndex = _ => dispatch => {
-  const url = `${baseUrl}api/stock`
+export const stockIndex = (page, perPage, param) => dispatch => {
+  const pageParam = page ? `page=${page}` : undefined
+  const perPageParam = perPage ? `perPage=${perPage}` : undefined
+  let allParam = [pageParam, perPageParam].filter(e => e).join('&')
+  if (allParam) allParam = `?${allParam}`
+  const url = `${baseUrl}api/stock${allParam}`
+  return dispatch(fetchPost(url, null, param, stockListsType))
+}
+
+export const stockLowIndex = () => dispatch => {
+  const url = `${baseUrl}api/stock/low`
   return dispatch(fetchIndex(url, null, null, stockListsType))
+}
+
+const stockReportListsType = [
+  STOCK_REPORT_LIST,
+  STOCK_REPORT_LIST_SUCCESS,
+  STOCK_REPORT_LIST_FAIL,
+]
+
+export const stockReport = param => dispatch => {
+  const data = {
+    ...param,
+  }
+  const url = `${baseUrl}api/stock/report`
+  return dispatch(fetchDownload(url, null, data, stockReportListsType))
+}
+
+const stockReportDetailType = [
+  STOCK_REPORT_DETAIL,
+  STOCK_REPORT_DETAIL_SUCCESS,
+  STOCK_REPORT_DETAIL_FAIL,
+]
+
+export const stockReportDetail = param => dispatch => {
+  const data = {
+    ...param,
+  }
+  const url = `${baseUrl}api/stock-detail/report`
+  return dispatch(fetchDownload(url, null, data, stockReportDetailType))
 }
 
 const stockDetailType = [
@@ -45,9 +89,13 @@ const stockDetailType = [
   STOCK_DETAIL_FAIL,
 ]
 
-export const stockDetail = ({ id }) => dispatch => {
-  const url = `${baseUrl}api/stock/${id}`
-  return dispatch(fetchIndex(url, null, null, stockDetailType))
+export const stockDetail = (page, perPage, param) => dispatch => {
+  const pageParam = page ? `page=${page}` : undefined
+  const perPageParam = perPage ? `perPage=${perPage}` : undefined
+  let allParam = [pageParam, perPageParam].filter(e => e).join('&')
+  if (allParam) allParam = `?${allParam}`
+  const url = `${baseUrl}api/stock-detail${allParam}`
+  return dispatch(fetchPost(url, null, param, stockDetailType))
 }
 
 const stockSaveType = [

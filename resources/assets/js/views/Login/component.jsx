@@ -46,7 +46,7 @@ class Login extends Component {
           <Card>
             <form onSubmit={this.doLogin}>
               <CardHeader color="primary">
-                <h4 className={classes.cardTitleWhite}>Login form</h4>
+                <h4 className={classes.cardTitleWhite}>Login Aplikasi Monitoring Stock</h4>
               </CardHeader>
               <CardBody>
                 {/* <GridContainer>

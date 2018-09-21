@@ -38,4 +38,16 @@ export const fetchDelete = (url, params = {}, data = {}, types = defaultIndexTyp
   },
 })
 
+export const fetchDownload = (url, params = {}, data = {}, types = defaultIndexTypes) => ({
+  types,
+  payload: {
+    request: {
+      method: 'POST', url, params, data,
+      responseType: 'blob',
+    },
+  },
+})
+
+
+
 export { fetchIndex as default }

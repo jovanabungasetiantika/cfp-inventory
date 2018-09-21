@@ -4,6 +4,7 @@ import {
   fetchPost,
   fetchPatch,
   fetchDelete,
+  fetchDownload,
 } from '../actions/fetch'
 import {
   STOCK_IN_LIST,
@@ -24,6 +25,9 @@ import {
   STOCK_IN_DELETE_LIST,
   STOCK_IN_DELETE_LIST_SUCCESS,
   STOCK_IN_DELETE_LIST_FAIL,
+  STOCK_IN_REPORT,
+  STOCK_IN_REPORT_SUCCESS,
+  STOCK_IN_REPORT_FAIL,
   STOCK_IN_CLEAN_FAIL,
   STOCK_IN_CLEAN_SUCCESS,
 } from '../constants/stockIn'
@@ -34,9 +38,36 @@ const stockInListsType = [
   STOCK_IN_LIST_FAIL,
 ]
 
-export const stockInIndex = _ => dispatch => {
-  const url = `${baseUrl}api/stock-in`
-  return dispatch(fetchIndex(url, null, null, stockInListsType))
+export const stockInIndex = (page, perPage, param) => dispatch => {
+  const pageParam = page ? `page=${page}` : undefined
+  const perPageParam = perPage ? `perPage=${perPage}` : undefined
+  let allParam = [pageParam, perPageParam].filter(e => e).join('&')
+  if (allParam) allParam = `?${allParam}`
+  const url = `${baseUrl}api/stock-in${allParam}`
+  return dispatch(fetchIndex(url, null, param, stockInListsType))
+}
+
+export const stockInIndexReport = (page, perPage, param) => dispatch => {
+  const pageParam = page ? `page=${page}` : undefined
+  const perPageParam = perPage ? `perPage=${perPage}` : undefined
+  let allParam = [pageParam, perPageParam].filter(e => e).join('&')
+  if (allParam) allParam = `?${allParam}`
+  const url = `${baseUrl}api/stock-in/report-index${allParam}`
+  return dispatch(fetchPost(url, null, param, stockInListsType))
+}
+
+const stockInReportType = [
+  STOCK_IN_REPORT,
+  STOCK_IN_REPORT_SUCCESS,
+  STOCK_IN_REPORT_FAIL,
+]
+
+export const stockInReport = param => dispatch => {
+  const data = {
+    ...param,
+  }
+  const url = `${baseUrl}api/stock-in/report`
+  return dispatch(fetchDownload(url, null, data, stockInReportType))
 }
 
 const stockInDetailType = [

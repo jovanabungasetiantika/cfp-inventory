@@ -34,8 +34,12 @@ const itemListsType = [
   ITEM_LIST_FAIL,
 ]
 
-export const itemIndex = _ => dispatch => {
-  const url = `${baseUrl}api/item`
+export const itemIndex = (page, perPage) => dispatch => {
+  const pageParam = page ? `page=${page}` : undefined
+  const perPageParam = perPage ? `perPage=${perPage}` : undefined
+  let allParam = [pageParam, perPageParam].filter(e => e).join('&')
+  if (allParam) allParam = `?${allParam}`
+  const url = `${baseUrl}api/item${allParam}`
   return dispatch(fetchIndex(url, null, null, itemListsType))
 }
 

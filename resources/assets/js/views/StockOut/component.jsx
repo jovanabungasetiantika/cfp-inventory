@@ -60,6 +60,11 @@ class StockOut extends Component {
     }
   }
 
+  navigateToReport = () => {
+    const { history } = this.props
+    history.push('/stock-out/report')
+  }
+
   triggerDialog = (id, name) => {
     const { openDialog, fetchDelete } = this.props
     openDialog({
@@ -156,6 +161,15 @@ class StockOut extends Component {
                 onClick={this.addClick}
               >
                 {isCreate ? 'Cancel' : 'Add New'}
+              </Button>
+              <Button
+                color="primary"
+                onClick={this.navigateToReport}
+                style={{
+                  float: 'right',
+                }}
+              >
+                Stock Out Report
               </Button>
               <Table
                 tableHeaderColor="primary"

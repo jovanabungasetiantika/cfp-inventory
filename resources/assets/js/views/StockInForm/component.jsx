@@ -99,6 +99,11 @@ class StockInForm extends Component {
       })
       return
     }
+    if(e.target.name === 'date') {
+      this.setState({
+        number: `IN-${Moment(e.target.value).format('YYYY/MMM/DD-HH-mm-ss')}`
+      })
+    }
     this.setState({ [e.target.name]: e.target.value })
   }
 

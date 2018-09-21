@@ -39,19 +39,14 @@ const defaultState = (state = initialState, { type, payload, error }) => {
         },
       )
     case ITEM_DELETE_LIST_SUCCESS:
-      tempData = _.find(state.data, d => d.id === payload.data.id) || {}
-      tempIdx = _.map(state.data, e => e.id).indexOf(payload.data.id)
-      if (tempIdx > -1) {
-        return Object.assign(
-          {},
-          state,
-          {
-            onSuccess: true,
-            successMessage: 'Data has been deleted successfully.',
-          },
-        )
-      }
-      return state
+      return Object.assign(
+        {},
+        state,
+        {
+          onSuccess: true,
+          successMessage: 'Data has been deleted successfully.',
+        },
+      )
     case ITEM_DELETE_LIST:
     case ITEM_CLEAN_FAIL:
     case ITEM_CLEAN_SUCCESS:

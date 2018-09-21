@@ -117,7 +117,7 @@ class App extends React.Component {
     return (
       <div className={classes.wrapper}>
         <Sidebar
-          logoText={"Raja Inventory"}
+          logoText={"Monitoring Stock"}
           routes={this.visibleDashboardRoutes}
           logo={logo}
           image={image}

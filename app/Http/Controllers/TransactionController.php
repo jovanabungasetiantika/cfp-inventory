@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Stock;
 use App\Models\Transaction;
+use Carbon\Carbon;
+use ExcelReport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Validator;
@@ -39,6 +41,24 @@ class TransactionController extends Controller
     }
 
     /**
+     * Return total item.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function stockCurrent(Request $request)
+    {
+        $stock = Stock::orderBy('date')
+            ->select(DB::raw('SUM(stocks.qty) as qty'))
+            ->where([
+                ['item_id', '=', $request['item_id']],
+                ['date', '<=', $request['date']],
+            ])
+            ->groupBy('item_id')
+            ->first();
+        return response()->json($stock, 200);
+    }
+
+    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
@@ -54,6 +74,181 @@ class TransactionController extends Controller
             $perPage = $request->perPage;
         }
         return response()->json(Transaction::withCount('details')->where('type', 'out')->paginate($perPage, ['*'], 'page', $page), 200);
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function stockInReportIndex(Request $request)
+    {
+        $dateFirst = $request->dateFirst;
+        $dateLast = $request->dateLast;
+
+        $page = 1;
+        $perPage = 10;
+        if ($request->page) {
+            $page = $request->page;
+        }
+        if ($request->perPage) {
+            $perPage = $request->perPage;
+        }
+
+        $transaction = Transaction::join('transaction_details', 'transactions.id', 'transaction_details.transaction_id')
+            ->join('items', 'transaction_details.item_id', 'items.id')
+            ->select('transactions.date',
+                'items.name',
+                'transaction_details.unit',
+                'transaction_details.qty',
+                'transaction_details.price',
+                DB::raw('transaction_details.qty * transaction_details.price as total')
+            )
+            ->whereDate('transactions.date', '>=', $dateFirst)
+            ->whereDate('transactions.date', '<=', $dateLast)
+            ->where('transactions.type', 'in');
+        return response()->json($transaction->paginate($perPage, ['*'], 'page', $page), 200);
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function stockInReport(Request $request)
+    {
+        $dateFirst = $request->dateFirst;
+        $dateLast = $request->dateLast;
+        $carbonFirstDate = Carbon::parse($dateFirst);
+        $carbonLastDate = Carbon::parse($dateLast);
+        
+        $title = 'DAFTAR BARANG MASUK ' . $carbonFirstDate->format('d F Y') . ' - ' . $carbonLastDate->format('d F Y');
+
+        $meta = [];
+
+        $queryBuilder = Transaction::join('transaction_details', 'transactions.id', 'transaction_details.transaction_id')
+            ->join('items', 'transaction_details.item_id', 'items.id')
+            ->join('categories', 'items.category_id', 'categories.id')
+            ->select('transactions.date',
+                'items.name',
+                'categories.name as category',
+                'transaction_details.unit',
+                'transaction_details.qty',
+                'transaction_details.price',
+                DB::raw('transaction_details.qty * transaction_details.price as total')
+            )
+            ->whereDate('transactions.date', '>=', $dateFirst)
+            ->whereDate('transactions.date', '<=', $dateLast)
+            ->where('transactions.type', 'in');
+
+        $columns = [
+            'Tanggal' => 'date',
+            'Jenis Barang' => 'name',
+            'Satuan' => 'unit',
+            'Category',
+            'Quantity' => 'qty',
+            'Harga Satuan' => 'price',
+            'Jumlah' => 'total',
+        ];
+
+        ExcelReport::of($title, $meta, $queryBuilder, $columns)
+            ->editColumns([
+                'Quantity',
+                'Harga Satuan',
+                'Jumlah',
+            ], [
+                'class' => 'right',
+            ])
+            ->groupBy('Category') // Show total of value on specific group. Used with showTotal() enabled.
+            ->showTotal([
+              'Quantity' => 'point',
+              'Jumlah' => 'point',
+            ])
+            ->download($title);
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function stockOutReportIndex(Request $request)
+    {
+        $dateFirst = $request->dateFirst;
+        $dateLast = $request->dateLast;
+
+        $page = 1;
+        $perPage = 10;
+        if ($request->page) {
+            $page = $request->page;
+        }
+        if ($request->perPage) {
+            $perPage = $request->perPage;
+        }
+
+        $transaction = Transaction::join('transaction_details', 'transactions.id', 'transaction_details.transaction_id')
+            ->join('items', 'transaction_details.item_id', 'items.id')
+            ->select('transactions.date',
+                'items.name',
+                'transaction_details.unit',
+                'transaction_details.qty',
+                'transaction_details.price',
+                DB::raw('transaction_details.qty * transaction_details.price as total')
+            )
+            ->whereDate('transactions.date', '>=', $dateFirst)
+            ->whereDate('transactions.date', '<=', $dateLast)
+            ->where('transactions.type', 'out');
+        return response()->json($transaction->paginate($perPage, ['*'], 'page', $page), 200);
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function stockOutReport(Request $request)
+    {
+        $dateFirst = $request->dateFirst;
+        $dateLast = $request->dateLast;
+        $carbonFirstDate = Carbon::parse($dateFirst);
+        $carbonLastDate = Carbon::parse($dateLast);
+        
+        $title = 'DAFTAR BARANG KELUAR ' . $carbonFirstDate->format('d F Y') . ' - ' . $carbonLastDate->format('d F Y');
+
+        $meta = [];
+
+        $queryBuilder = Transaction::join('transaction_details', 'transactions.id', 'transaction_details.transaction_id')
+            ->join('items', 'transaction_details.item_id', 'items.id')
+            ->join('categories', 'items.category_id', 'categories.id')
+            ->select('transactions.date',
+                'items.name',
+                'categories.name as category',
+                'transaction_details.unit',
+                'transaction_details.qty'
+            )
+            ->whereDate('transactions.date', '>=', $dateFirst)
+            ->whereDate('transactions.date', '<=', $dateLast)
+            ->where('transactions.type', 'out');
+
+        $columns = [
+            'Tanggal' => 'date',
+            'Jenis Barang' => 'name',
+            'Satuan' => 'unit',
+            'Category',
+            'Quantity' => 'qty',
+        ];
+
+        ExcelReport::of($title, $meta, $queryBuilder, $columns)
+            ->editColumns([
+                'Quantity',
+            ], [
+                'class' => 'right',
+            ])
+            ->groupBy('Category') // Show total of value on specific group. Used with showTotal() enabled.
+            ->showTotal([
+              'Quantity' => 'point',
+            ])
+            ->download($title);
     }
 
     /**
@@ -155,15 +350,27 @@ class TransactionController extends Controller
 
             $details = $request->details;
             foreach ($details as $detail) {
+                $stock = Stock::orderBy('date')
+                    ->select(DB::raw('SUM(stocks.qty) as qty'))
+                    ->where([
+                        ['item_id', '=', $detail['item_id']],
+                        ['date', '<=', $request->date],
+                    ])
+                    ->groupBy('item_id')
+                    ->first();
+                $qty = $detail['qty'];
+                if ($stock->qty < $qty) {
+                    return response()->json('Stock not enough.', 400);
+                }
                 $oldTrc = Stock::join('items', 'items.id', 'stocks.item_id')
-                    ->orderBy('items.name')
+                    ->orderBy('items.name', 'stocks.date')
                     ->select('stocks.item_id', DB::raw('SUM(stocks.qty) as qty'), 'stocks.unit', 'stocks.price')
                     ->where([
-                      ['stocks.item_id', '=', $detail['item_id']],
+                        ['stocks.item_id', '=', $detail['item_id']],
+                        ['date', '<=', $request->date],
                     ])
                     ->groupBy('stocks.item_id', 'stocks.price', 'stocks.unit')
                     ->get();
-                $qty = $detail['qty'];
                 foreach ($oldTrc as $trc) {
                     $stock = new Stock;
                     if ($trc->qty < $qty) {
@@ -200,7 +407,12 @@ class TransactionController extends Controller
      */
     public function stockInShow(Transaction $transaction)
     {
-        return response()->json($transaction->with('details.item')->where('type', 'in')->first(), 200);
+        $id = $transaction->id;
+        $trans = $transaction->with('details.item')->where([
+            ['type', 'in'],
+            ['id', $id],
+        ])->first();
+        return response()->json($trans, 200);
     }
 
     /**
@@ -211,7 +423,12 @@ class TransactionController extends Controller
      */
     public function stockOutShow(Transaction $transaction)
     {
-        return response()->json($transaction->with('details.item')->where('type', 'out')->first(), 200);
+      $id = $transaction->id;
+        $trans = $transaction->with('details.item')->where([
+            ['type', 'out'],
+            ['id', $id],
+        ])->first();
+        return response()->json($trans, 200);
     }
 
     /**
@@ -318,13 +535,23 @@ class TransactionController extends Controller
 
             $details = $request->details;
             foreach ($details as $detail) {
-                $oldTrc = DB::table('stocks')
-                    ->select('price', 'qty', 'unit')
-                    ->where([
-                        ['item_id', $detail['item_id']],
-                    ])
-                    ->orderBy('date');
+                $stock = Stock::orderBy('date')
+                    ->select(DB::raw('SUM(stocks.qty) as qty'))
+                    ->where('item_id', '=', $detail['item_id'])
+                    ->groupBy('item_id')
+                    ->first();
                 $qty = $detail['qty'];
+                if ($stock->qty < $qty) {
+                    return response()->json('Stock not enough.', 400);
+                }
+                $oldTrc = Stock::join('items', 'items.id', 'stocks.item_id')
+                    ->orderBy('items.name', 'stocks.date')
+                    ->select('stocks.item_id', DB::raw('SUM(stocks.qty) as qty'), 'stocks.unit', 'stocks.price')
+                    ->where([
+                        ['stocks.item_id', '=', $detail['item_id']],
+                    ])
+                    ->groupBy('stocks.item_id', 'stocks.price', 'stocks.unit')
+                    ->get();
                 foreach ($oldTrc as $trc) {
                     $stock = new Stock;
                     if ($trc['qty'] < $qty) {

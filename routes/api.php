@@ -25,85 +25,102 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/logout', 'UserController@logout');
 
     Route::prefix('category')->group(function () {
-      Route::get('/', 'CategoryController@index');
-  
-      Route::post('/', 'CategoryController@store');
-      
-      Route::get('/all', 'CategoryController@getAll');
+        Route::get('/', 'CategoryController@index');
 
-      Route::get('/{category}', 'CategoryController@show');
-  
-      Route::patch('/{category}', 'CategoryController@update');
-  
-      Route::delete('/{category}', 'CategoryController@destroy');
+        Route::post('/', 'CategoryController@store');
 
-  });
-  
-  Route::prefix('item')->group(function () {
-    Route::get('/', 'ItemController@index');
-  
-    Route::post('/', 'ItemController@store');
-    
-    Route::get('/all', 'ItemController@getAll');
-  
-    Route::get('/{item}', 'ItemController@show');
-  
-    Route::patch('/{item}', 'ItemController@update');
-  
-    Route::delete('/{item}', 'ItemController@destroy');
-  });
+        Route::get('/all', 'CategoryController@getAll');
 
-  Route::prefix('stock-in')->group(function () {
-    Route::get('/', 'TransactionController@stockInIndex');
-  
-    Route::post('/', 'TransactionController@stockInStore');
-  
-    Route::get('/{transaction}', 'TransactionController@stockInShow');
-  
-    Route::patch('/{transaction}', 'TransactionController@stockInUpdate');
-  
-    Route::delete('/{transaction}', 'TransactionController@destroy');
-  });
+        Route::get('/{category}', 'CategoryController@show');
 
-  Route::prefix('stock-out')->group(function () {
-    Route::get('/', 'TransactionController@stockOutIndex');
-  
-    Route::post('/', 'TransactionController@stockOutStore');
-  
-    Route::get('/{transaction}', 'TransactionController@stockOutShow');
-  
-    Route::patch('/{transaction}', 'TransactionController@stockOutUpdate');
-  
-    Route::delete('/{transaction}', 'TransactionController@destroy');
-  });
+        Route::patch('/{category}', 'CategoryController@update');
 
-  Route::prefix('stock')->group(function () {
-    Route::get('/', 'StockController@index');
-  
-    // Route::post('/', 'TransactionController@stockOutStore');
-  
-    // Route::get('/{transaction}', 'TransactionController@stockOutShow');
-  
-    // Route::patch('/{transaction}', 'TransactionController@stockOutUpdate');
-  
-    // Route::delete('/{transaction}', 'TransactionController@destroy');
-  });
+        Route::delete('/{category}', 'CategoryController@destroy');
 
-  Route::prefix('period')->group(function () {
-    Route::get('/', 'PeriodController@index');
-  
-    Route::post('/close', 'PeriodController@close');
+    });
 
-    Route::post('/open', 'PeriodController@open');
+    Route::prefix('item')->group(function () {
+        Route::get('/', 'ItemController@index');
 
-    // Route::post('/', 'PeriodController@store');
-  
-    // Route::get('/{period}', 'PeriodController@show');
-  
-    // Route::patch('/{period}', 'PeriodController@update');
-  
-    // Route::delete('/{period}', 'PeriodController@destroy');
-  });
+        Route::post('/', 'ItemController@store');
+
+        Route::get('/all', 'ItemController@getAll');
+
+        Route::get('/{item}', 'ItemController@show');
+
+        Route::patch('/{item}', 'ItemController@update');
+
+        Route::delete('/{item}', 'ItemController@destroy');
+    });
+
+    Route::prefix('stock-in')->group(function () {
+        Route::get('/', 'TransactionController@stockInIndex');
+
+        Route::post('/', 'TransactionController@stockInStore');
+
+        Route::post('/report-index', 'TransactionController@stockInReportIndex');
+
+        Route::post('/report', 'TransactionController@stockInReport');
+
+        Route::get('/{transaction}', 'TransactionController@stockInShow');
+
+        Route::patch('/{transaction}', 'TransactionController@stockInUpdate');
+
+        Route::delete('/{transaction}', 'TransactionController@destroy');
+    });
+
+    Route::prefix('stock-out')->group(function () {
+        Route::get('/', 'TransactionController@stockOutIndex');
+
+        Route::post('/', 'TransactionController@stockOutStore');
+
+        Route::post('/report-index', 'TransactionController@stockOutReportIndex');
+
+        Route::post('/report', 'TransactionController@stockOutReport');
+
+        Route::get('/{transaction}', 'TransactionController@stockOutShow');
+
+        Route::patch('/{transaction}', 'TransactionController@stockOutUpdate');
+
+        Route::delete('/{transaction}', 'TransactionController@destroy');
+    });
+
+    Route::prefix('stock')->group(function () {
+        Route::post('/', 'StockController@index');
+
+        Route::post('/report', 'StockController@stockReport');
+
+        Route::get('/low', 'StockController@lowStockIndex');
+        // Route::post('/', 'TransactionController@stockOutStore');
+
+        // Route::get('/{transaction}', 'TransactionController@stockOutShow');
+
+        // Route::patch('/{transaction}', 'TransactionController@stockOutUpdate');
+
+        // Route::delete('/{transaction}', 'TransactionController@destroy');
+    });
+
+    Route::prefix('stock-detail')->group(function () {
+        Route::post('/', 'StockController@detail');
+
+        Route::post('/report', 'StockController@stockReportDetail');
+    });
+
+    Route::prefix('period')->group(function () {
+        Route::get('/', 'PeriodController@index');
+
+        Route::post('/close', 'PeriodController@close');
+
+        Route::post('/open', 'PeriodController@open');
+
+        // Route::post('/', 'PeriodController@store');
+
+        // Route::get('/{period}', 'PeriodController@show');
+
+        // Route::patch('/{period}', 'PeriodController@update');
+
+        // Route::delete('/{period}', 'PeriodController@destroy');
+    });
 });
 
 Route::post('/login', 'UserController@login');

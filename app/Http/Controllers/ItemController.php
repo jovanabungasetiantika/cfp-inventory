@@ -24,7 +24,7 @@ class ItemController extends Controller
         if ($request->perPage) {
             $perPage = $request->perPage;
         }
-        return response()->json(Item::with('category')->paginate($perPage, ['*'], 'page', $page), 200);
+        return response()->json(Item::with('category')->orderBy('updated_at', 'DESC')->paginate($perPage, ['*'], 'page', $page), 200);
     }
 
     /**
@@ -83,7 +83,8 @@ class ItemController extends Controller
      */
     public function show(Item $item)
     {
-        return response()->json($item->with('category')->first(), 200);
+        $id = $item->id;
+        return response()->json($item->with('category')->where('id', $id)->first(), 200);
     }
 
     /**

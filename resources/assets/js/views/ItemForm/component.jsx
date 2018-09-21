@@ -123,6 +123,7 @@ class ItemForm extends Component {
                       id="name"
                       name="name"
                       inputProps={{
+                        autoFocus: true,
                         value: name,
                         onChange: this.onChange,
                       }}

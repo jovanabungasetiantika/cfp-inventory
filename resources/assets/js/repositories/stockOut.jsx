@@ -24,6 +24,9 @@ import {
   STOCK_OUT_DELETE_LIST,
   STOCK_OUT_DELETE_LIST_SUCCESS,
   STOCK_OUT_DELETE_LIST_FAIL,
+  STOCK_OUT_REPORT,
+  STOCK_OUT_REPORT_SUCCESS,
+  STOCK_OUT_REPORT_FAIL,
   STOCK_OUT_CLEAN_FAIL,
   STOCK_OUT_CLEAN_SUCCESS,
 } from '../constants/stockOut'
@@ -34,9 +37,36 @@ const stockOutListsType = [
   STOCK_OUT_LIST_FAIL,
 ]
 
-export const stockOutIndex = _ => dispatch => {
-  const url = `${baseUrl}api/stock-out`
-  return dispatch(fetchIndex(url, null, null, stockOutListsType))
+export const stockOutIndex = (page, perPage, param) => dispatch => {
+  const pageParam = page ? `page=${page}` : undefined
+  const perPageParam = perPage ? `perPage=${perPage}` : undefined
+  let allParam = [pageParam, perPageParam].filter(e => e).join('&')
+  if (allParam) allParam = `?${allParam}`
+  const url = `${baseUrl}api/stock-out${allParam}`
+  return dispatch(fetchIndex(url, null, param, stockOutListsType))
+}
+
+export const stockOutIndexReport = (page, perPage, param) => dispatch => {
+  const pageParam = page ? `page=${page}` : undefined
+  const perPageParam = perPage ? `perPage=${perPage}` : undefined
+  let allParam = [pageParam, perPageParam].filter(e => e).join('&')
+  if (allParam) allParam = `?${allParam}`
+  const url = `${baseUrl}api/stock-out/report-index${allParam}`
+  return dispatch(fetchPost(url, null, param, stockOutListsType))
+}
+
+const stockOutReportType = [
+  STOCK_OUT_REPORT,
+  STOCK_OUT_REPORT_SUCCESS,
+  STOCK_OUT_REPORT_FAIL,
+]
+
+export const stockOutReport = param => dispatch => {
+  const data = {
+    ...param,
+  }
+  const url = `${baseUrl}api/stock-out/report`
+  return dispatch(fetchDownload(url, null, data, stockOutReportType))
 }
 
 const stockOutDetailType = [

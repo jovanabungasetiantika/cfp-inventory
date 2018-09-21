@@ -8,7 +8,7 @@ import LocationOn from "@material-ui/icons/LocationOn";
 import Notifications from "@material-ui/icons/Notifications";
 import Unarchive from "@material-ui/icons/Unarchive";
 // core components/views
-import DashboardPage from "../views/Dashboard/Dashboard.jsx";
+import DashboardPage from "../views/Dashboard/container.jsx";
 import UserProfile from "../views/UserProfile/container";
 import TableList from "../views/TableList/TableList.jsx";
 import Category from "../views/Category/container.jsx";
@@ -20,9 +20,12 @@ import Maps from "../views/Maps/Maps.jsx";
 import NotificationsPage from "../views/Notifications/Notifications.jsx";
 import StockIn from '../views/StockIn/container'
 import StockInForm from '../views/StockInForm/container'
+import StockInReport from '../views/StockInReport/container'
 import StockOut from '../views/StockOut/container'
 import StockOutForm from '../views/StockOutForm/container'
+import StockOutReport from '../views/StockOutReport/container'
 import Stock from '../views/Stock/container'
+import StockDetail from '../views/StockDetail/container'
 // import UpgradeToPro from "../views/UpgradeToPro/UpgradeToPro.jsx";
 
 const dashboardRoutes = [
@@ -95,6 +98,14 @@ const dashboardRoutes = [
     component: StockInForm
   },
   {
+    path: "/stock-in/report",
+    sidebarName: "Stock In",
+    navbarName: "Stock In - Report",
+    icon: 'input',
+    hide: true,
+    component: StockInReport
+  },
+  {
     path: "/stock-in/:id",
     sidebarName: "Stock In",
     navbarName: "Stock In - Detail",
@@ -126,6 +137,14 @@ const dashboardRoutes = [
     component: StockOutForm
   },
   {
+    path: "/stock-out/report",
+    sidebarName: "Stock Out",
+    navbarName: "Stock Out - Report",
+    icon: 'launch',
+    hide: true,
+    component: StockOutReport
+  },
+  {
     path: "/stock-out/:id",
     sidebarName: "Stock Out",
     navbarName: "Stock Out - Detail",
@@ -139,6 +158,14 @@ const dashboardRoutes = [
     navbarName: "Stock Out",
     icon: 'launch',
     component: StockOut
+  },
+  {
+    path: "/stock-on-hand/:id",
+    sidebarName: "Stock Card",
+    navbarName: "Stock Card",
+    icon: 'swap_horiz',
+    hide: true,
+    component: StockDetail
   },
   {
     path: "/stock-on-hand",

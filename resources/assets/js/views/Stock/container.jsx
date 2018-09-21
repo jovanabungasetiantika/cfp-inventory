@@ -13,8 +13,8 @@ import Component from './component';
 
 import {
   stockIndex as fetchIndex,
-  stockDeleteList as fetchDelete,
   stockCleanFail as fetchCleanFail,
+  stockReport,
 } from '../../repositories/stock'
 import { openDialog } from '../../services/dialog/actions'
 
@@ -77,11 +77,11 @@ const mapDispatchToProps = dispatch => ({
   fetchIndex(...params) {
     return dispatch(fetchIndex(...params))
   },
-  fetchDelete(...params) {
-    return dispatch(fetchDelete(...params))
-  },
   fetchCleanFail(...params) {
     return dispatch(fetchCleanFail(...params))
+  },
+  stockReport(...params) {
+    return dispatch(stockReport(...params))
   },
   openDialog(...params) {
     return dispatch(openDialog(...params))

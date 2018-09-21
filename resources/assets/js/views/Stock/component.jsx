@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import _ from 'lodash';
 import Moment from 'moment';
 import NumericLabel from 'react-pretty-numbers';
+import { Link } from 'react-router-dom';
 // @material-ui/core components
 import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from "@material-ui/core/IconButton";
@@ -30,8 +31,14 @@ const numberOptions = {
 class Stock extends Component {
   constructor(props) {
     super(props)
+    const currentDate = Moment()
+    const dateLast = currentDate.format('YYYY-MM-DD')
+    currentDate.subtract(1, 'months')
+    const dateFirst = currentDate.format('YYYY-MM-DD')
     this.state = {
       error: '',
+      dateFirst,
+      dateLast,
       perPage: 5,
       page: 1,
     }
@@ -40,9 +47,9 @@ class Stock extends Component {
 
   getList = async () => {
     const { fetchIndex } = this.props
-    const { page, perPage } = this.state
+    const { page, perPage, dateFirst, dateLast } = this.state
     try {
-      await fetchIndex(page, perPage)
+      await fetchIndex(page, perPage, { dateFirst, dateLast })
     } catch (e) {
       this.setState({ error: 'Get list Error' })
     }
@@ -60,60 +67,32 @@ class Stock extends Component {
     }
   }
 
-  triggerDialog = (id, name) => {
-    const { openDialog, fetchDelete } = this.props
-    openDialog({
-      title: `Remove "${name}" from Stock?`,
-      body: '',
-      action: async () => {
-        await fetchDelete({ id }).then(this.getList)
-      }
-    })
+  onChange = e => {
+    this.setState({ [e.target.name]: e.target.value })
   }
 
   renderTableData = () => {
     const { classes, stocks } = this.props;
-    const { perPage } = this.state;
+    const { perPage, page } = this.state;
 
     let tableData = []
     let pagination
-    if (stocks && stocks.data) {
+    if (stocks && stocks.data && !stocks.count) {
       let count = stocks.from || 1
       tableData.push(..._.map(stocks.data, row => {
         return [
           count++,
-          row.item.name,
-          row.qty,
+          <Link to={`/stock-on-hand/${row.id}`} >{row.name}</Link>,
           row.unit,
-          <NumericLabel params={numberOptions}>{row.price}</NumericLabel>,
+          row.qty,
           <NumericLabel params={numberOptions}>{row.qty * row.price}</NumericLabel>,
-          Moment(row.updated_at).format('DD/MM/YYYY HH:mm:ss'),
-          (
-            <div>
-              <IconButton
-                aria-label="Edit"
-                className={classes.tableActionButton}
-                onClick={() => this.editClick(row.id)}
-              >
-                <Edit
-                  className={
-                    classes.tableActionButtonIcon + " " + classes.edit
-                  }
-                />
-              </IconButton>
-              <IconButton
-                aria-label="Close"
-                className={classes.tableActionButton}
-                onClick={() => this.triggerDialog(row.id, row.number)}
-              >
-                <Close
-                  className={
-                    classes.tableActionButtonIcon + " " + classes.close
-                  }
-                />
-              </IconButton>
-            </div>
-          ),
+          row.inQty,
+          <NumericLabel params={numberOptions}>{row.inPrice}</NumericLabel>,
+          row.outQty,
+          <NumericLabel params={numberOptions}>{row.outPrice}</NumericLabel>,
+          Number(row.qty) + Number(row.inQty) - row.outQty,
+          <NumericLabel params={numberOptions}>{(Number(row.qty) + Number(row.inQty) - row.outQty) * row.price}</NumericLabel>,
+          // Moment(row.updated_at).format('DD/MM/YYYY HH:mm:ss'),
         ]
       }))
 
@@ -136,9 +115,14 @@ class Stock extends Component {
     }
   }
 
+  reportGenerate = async () => {
+    const { dateFirst, dateLast } = this.state
+    await this.props.stockReport({ dateFirst, dateLast })
+  }
+
   render() {
     const { classes } = this.props;
-    const { isCreate } = this.state;
+    const { dateFirst, dateLast } = this.state;
 
     const { tableData, pagination } = this.renderTableData()
 
@@ -152,15 +136,67 @@ class Stock extends Component {
               </p> */}
             </CardHeader>
             <CardBody>
-              <Button
-                color="primary"
-                onClick={this.addClick}
-              >
-                {isCreate ? 'Cancel' : 'Add New'}
-              </Button>
+              <GridContainer>
+                <GridItem xs={12} sm={12} md={4}>
+                  <CustomInput
+                    labelText="Start Date"
+                    id="dateFirst"
+                    name="dateFirst"
+                    inputProps={{
+                      value: dateFirst,
+                      onChange: this.onChange,
+                      type: 'date',
+                    }}
+                    labelProps={{
+                      shrink: true,
+                    }}
+                    formControlProps={{
+                      fullWidth: true
+                    }}
+                  />
+                </GridItem>
+                <GridItem xs={12} sm={12} md={4}>
+                  <CustomInput
+                    labelText="End Date"
+                    id="dateLast"
+                    name="dateLast"
+                    inputProps={{
+                      value: dateLast,
+                      onChange: this.onChange,
+                      type: 'date',
+                    }}
+                    labelProps={{
+                      shrink: true,
+                    }}
+                    formControlProps={{
+                      fullWidth: true
+                    }}
+                  />
+                </GridItem>
+                <GridItem xs={12} sm={12} md={4}>
+                  <Button
+                    color="primary"
+                    onClick={this.getList}
+                    style={{
+                      marginTop: '30px',
+                    }}
+                  >
+                    Filter
+                  </Button>
+                  <Button
+                    color="primary"
+                    onClick={this.reportGenerate}
+                    style={{
+                      marginTop: '30px',
+                    }}
+                  >
+                    Generate Report
+                  </Button>
+                </GridItem>
+              </GridContainer>
               <Table
                 tableHeaderColor="primary"
-                tableHead={["No.", "Item Name", "Quantity", "Unit", "Price", "Total", "Date", "Action"]}
+                tableHead={["No.", "Item Name", "Unit", "Balance Qty", "Balance Price", "In Qty", "In Price", "Out Qty", "Out Price", "Total Qty", "Total Price"]} //, "Action", "Date"
                 tableData={tableData}
                 pagination={pagination}
               />
