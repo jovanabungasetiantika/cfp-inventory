@@ -139,6 +139,9 @@ class TransactionController extends Controller
                 'transaction_details.price',
                 DB::raw('transaction_details.qty * transaction_details.price as total')
             )
+            ->orderBy('transactions.date', 'ASC')
+            ->orderBy('category', 'ASC')
+            ->orderBy('items.name', 'ASC')
             ->whereDate('transactions.date', '>=', $dateFirst)
             ->whereDate('transactions.date', '<=', $dateLast)
             ->where('transactions.type', 'in');
@@ -197,6 +200,8 @@ class TransactionController extends Controller
                 'transaction_details.price',
                 DB::raw('transaction_details.qty * transaction_details.price as total')
             )
+            ->orderBy('transactions.date', 'ASC')
+            ->orderBy('items.name', 'ASC')
             ->whereDate('transactions.date', '>=', $dateFirst)
             ->whereDate('transactions.date', '<=', $dateLast)
             ->where('transactions.type', 'out');
