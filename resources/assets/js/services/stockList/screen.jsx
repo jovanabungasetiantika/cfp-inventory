@@ -7,6 +7,9 @@ import {
   STOCK_REPORT_LIST,
   STOCK_REPORT_LIST_SUCCESS,
   STOCK_REPORT_LIST_FAIL,
+  STOCK_CARD_REPORT_LIST,
+  STOCK_CARD_REPORT_LIST_SUCCESS,
+  STOCK_CARD_REPORT_LIST_FAIL,
   STOCK_DELETE_LIST,
   STOCK_DELETE_LIST_SUCCESS,
   STOCK_DELETE_LIST_FAIL,
@@ -30,10 +33,12 @@ const defaultState = (state = initialState, { type, payload, error }) => {
     case STOCK_LIST:
       return Object.assign({}, state, initialState)
     case STOCK_REPORT_LIST:
+    case STOCK_CARD_REPORT_LIST:
       return Object.assign({}, state, { onLoading: true, onSuccess: false, onError: false })
     case STOCK_LIST_SUCCESS:
       return Object.assign({}, state, { data: payload.data })
     case STOCK_LIST_FAIL:
+    case STOCK_CARD_REPORT_LIST_FAIL:
     case STOCK_REPORT_LIST_FAIL:
     case STOCK_DELETE_LIST_FAIL:
       return Object.assign(
@@ -55,6 +60,7 @@ const defaultState = (state = initialState, { type, payload, error }) => {
           successMessage: 'Data has been deleted successfully.',
         },
       )
+    case STOCK_CARD_REPORT_LIST_SUCCESS:
     case STOCK_REPORT_LIST_SUCCESS:
       const blob = new Blob([payload.data], { type: payload.data.type });
       const url = window.URL.createObjectURL(blob);

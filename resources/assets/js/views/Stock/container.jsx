@@ -15,6 +15,7 @@ import {
   stockIndex as fetchIndex,
   stockCleanFail as fetchCleanFail,
   stockReport,
+  stockCardReport,
 } from '../../repositories/stock'
 import { openDialog } from '../../services/dialog/actions'
 
@@ -82,6 +83,9 @@ const mapDispatchToProps = dispatch => ({
   },
   stockReport(...params) {
     return dispatch(stockReport(...params))
+  },
+  stockCardReport(...params) {
+    return dispatch(stockCardReport(...params))
   },
   openDialog(...params) {
     return dispatch(openDialog(...params))

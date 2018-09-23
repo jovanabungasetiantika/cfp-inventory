@@ -106,6 +106,12 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/report', 'StockController@stockReportDetail');
     });
 
+    Route::prefix('stock-card')->group(function () {
+      // Route::post('/', 'StockController@detail');
+
+      Route::post('/report', 'StockController@stockReportDetailAll');
+  });
+
     Route::prefix('period')->group(function () {
         Route::get('/', 'PeriodController@index');
 

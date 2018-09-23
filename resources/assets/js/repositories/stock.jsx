@@ -33,6 +33,9 @@ import {
   STOCK_REPORT_DETAIL,
   STOCK_REPORT_DETAIL_FAIL,
   STOCK_REPORT_DETAIL_SUCCESS,
+  STOCK_CARD_REPORT_LIST,
+  STOCK_CARD_REPORT_LIST_SUCCESS,
+  STOCK_CARD_REPORT_LIST_FAIL,
 } from '../constants/stock'
 
 const stockListsType = [
@@ -67,6 +70,20 @@ export const stockReport = param => dispatch => {
   }
   const url = `${baseUrl}api/stock/report`
   return dispatch(fetchDownload(url, null, data, stockReportListsType))
+}
+
+const stockReportCardListsType = [
+  STOCK_CARD_REPORT_LIST,
+  STOCK_CARD_REPORT_LIST_SUCCESS,
+  STOCK_CARD_REPORT_LIST_FAIL,
+]
+
+export const stockCardReport = param => dispatch => {
+  const data = {
+    ...param,
+  }
+  const url = `${baseUrl}api/stock-card/report`
+  return dispatch(fetchDownload(url, null, data, stockReportCardListsType))
 }
 
 const stockReportDetailType = [

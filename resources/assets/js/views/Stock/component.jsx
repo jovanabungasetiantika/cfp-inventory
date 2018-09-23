@@ -120,6 +120,11 @@ class Stock extends Component {
     await this.props.stockReport({ dateFirst, dateLast })
   }
 
+  reportStockCardGenerate = async () => {
+    const { dateFirst, dateLast } = this.state
+    await this.props.stockCardReport({ dateFirst, dateLast })
+  }
+
   render() {
     const { classes } = this.props;
     const { dateFirst, dateLast } = this.state;
@@ -177,20 +182,20 @@ class Stock extends Component {
                   <Button
                     color="primary"
                     onClick={this.getList}
-                    style={{
-                      marginTop: '30px',
-                    }}
                   >
                     Filter
                   </Button>
                   <Button
                     color="primary"
                     onClick={this.reportGenerate}
-                    style={{
-                      marginTop: '30px',
-                    }}
                   >
                     Generate Report
+                  </Button>
+                  <Button
+                    color="primary"
+                    onClick={this.reportStockCardGenerate}
+                  >
+                    Generate All Stock Cards
                   </Button>
                 </GridItem>
               </GridContainer>

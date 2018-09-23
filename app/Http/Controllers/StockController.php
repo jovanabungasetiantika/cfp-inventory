@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Item;
 use App\Models\Stock;
 use Carbon\Carbon;
+use Excel;
 use ExcelReport;
 use Illuminate\Http\Request;
 
@@ -27,7 +28,7 @@ class StockController extends Controller
         }
         $dateFirst = $request->dateFirst;
         $dateLast = $request->dateLast;
-        
+
         $stock = Item::leftJoin('stocks', 'items.id', 'stocks.item_id')
             ->join('categories', 'items.category_id', 'categories.id')
             ->selectRaw('items.id,
@@ -185,9 +186,9 @@ class StockController extends Controller
             stocks.date,
             CASE WHEN stocks.qty > 0 AND stocks.date >= ? AND stocks.date <= ? THEN stocks.qty ELSE 0 END as inQty,
             CASE WHEN stocks.qty < 0 AND stocks.date >= ? AND stocks.date <= ? THEN ABS(stocks.qty) ELSE 0 END as outQty,
-            (
+            IFNULL((
                 SELECT SUM(cum.qty) FROM stocks as cum WHERE cum.date >= ? AND cum.date <= ? AND cum.id <= stocks.id AND cum.item_id = ?
-            ) as finalQty',
+            ), 0) as finalQty',
                 [$dateFirst, $dateLast, $dateFirst, $dateLast, $dateFirst, $dateLast, $itemId]
             )
             ->where('items.id', $itemId)
@@ -226,6 +227,106 @@ class StockController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    public function stockReportDetailAll(Request $request)
+    {
+        $dateFirst = $request->dateFirst;
+        $dateLast = $request->dateLast;
+        $itemId = $request->id;
+        $carbonFirstDate = Carbon::parse($dateFirst);
+        $carbonLastDate = Carbon::parse($dateLast);
+        $items = Item::all();
+        $title = 'Kartu Stock';
+
+        $columns = [
+            'Tanggal' => 'date',
+            'Masuk' => 'inQty',
+            'Keluar' => 'outQty',
+            'Sisa' => 'finalQty',
+        ];
+
+        return Excel::create($title, function ($excel) use ($items, $title, $dateFirst, $dateLast, $columns) {
+            foreach ($items as $item) {
+                $sheetName = str_replace  ("'", "", $item->name);
+                $sheetName = preg_replace ('/[^\p{L}\p{N}]/u', '_', $sheetName);
+                $excel->sheet(substr($sheetName, 0, 30), function ($sheet) use ($item, $title, $dateFirst, $dateLast, $columns) {
+                    $headers = [
+                        'title' => $title,
+                        'meta' => [
+                            'Kartu Stok:' => $item->name,
+                        ],
+                    ];
+                    $query = Item::leftJoin('stocks', 'items.id', 'stocks.item_id')
+                        ->selectRaw('items.id,
+                            items.name,
+                            items.unit,
+                            stocks.number,
+                            stocks.date,
+                            CASE WHEN stocks.qty > 0 AND stocks.date >= ? AND stocks.date <= ? THEN stocks.qty ELSE 0 END as inQty,
+                            CASE WHEN stocks.qty < 0 AND stocks.date >= ? AND stocks.date <= ? THEN ABS(stocks.qty) ELSE 0 END as outQty,
+                            IFNULL((
+                                SELECT SUM(cum.qty) FROM stocks as cum WHERE cum.date >= ? AND cum.date <= ? AND cum.id <= stocks.id AND cum.item_id = ?
+                            ), 0) as finalQty',
+                            [$dateFirst, $dateLast, $dateFirst, $dateLast, $dateFirst, $dateLast, $item->id]
+                        )
+                        ->where('items.id', $item->id)
+                        ->orderBy('stocks.date', 'ASC')
+                        ->groupBy('items.id',
+                            'items.name',
+                            'items.unit',
+                            'stocks.id',
+                            'stocks.number',
+                            'stocks.qty',
+                            'stocks.date',
+                            'stocks.price'
+                        )
+                        ->distinct();
+
+                    $limit = null;
+                    $groupByArr = [];
+                    $orientation = 'portrait';
+                    $editColumns = [];
+                    $showTotalColumns = [];
+                    $styles = [];
+                    $showHeader = true;
+                    $showMeta = true;
+                    $applyFlush = true;
+                    $showNumColumn = true;
+
+                    $sheet->setColumnFormat(['A:Z' => '@']);
+                    $sheet->loadView('general-excel-template',
+                        compact(
+                            'headers',
+                            'columns',
+                            'editColumns',
+                            'showTotalColumns',
+                            'styles',
+                            'query',
+                            'limit',
+                            'groupByArr',
+                            'orientation',
+                            'showHeader',
+                            'showMeta',
+                            'applyFlush',
+                            'showNumColumn'
+                        )
+                    );
+                });
+            }
+            // ->editColumns([
+            //     'Masuk',
+            //     'Keluar',
+            //     'Sisa',
+            // ], [
+            //     'class' => 'right',
+            // ]);
+        })->export('xlsx');
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function detail(Request $request)
     {
         $page = 1;
@@ -247,9 +348,9 @@ class StockController extends Controller
                 stocks.date,
                 CASE WHEN stocks.qty > 0 AND stocks.date >= ? AND stocks.date <= ? THEN stocks.qty ELSE 0 END as inQty,
                 CASE WHEN stocks.qty < 0 AND stocks.date >= ? AND stocks.date <= ? THEN ABS(stocks.qty) ELSE 0 END as outQty,
-                (
+                IFNULL((
                     SELECT SUM(cum.qty) FROM stocks as cum WHERE cum.date >= ? AND cum.date <= ? AND cum.id <= stocks.id AND cum.item_id = ?
-                ) as finalQty',
+                ), 0) as finalQty',
                 [$dateFirst, $dateLast, $dateFirst, $dateLast, $dateFirst, $dateLast, $itemId]
             )
             ->where('items.id', $itemId)
@@ -290,10 +391,10 @@ class StockController extends Controller
             ->orderByRaw('SUM(stocks.qty) ASC');
         $total = Item::count();
         return response()->json([
-          'count' => $stock->havingRaw('SUM(stocks.qty) < 10')->get()->count(),
-          'total' => $total,
-          'data' => $stock->limit(10)->get(),
-          'current_page' => 0,
+            'count' => $stock->havingRaw('SUM(stocks.qty) < 10')->get()->count(),
+            'total' => $total,
+            'data' => $stock->limit(10)->get(),
+            'current_page' => 0,
         ], 200);
     }
 

@@ -73,7 +73,7 @@ const mapStateToProps = ({ screen, services }, props) => {
   return {
     onLoading: screen.stockLists.detail.onLoading || false,
     id,
-    item: screen.itemLists.detial.data || {},
+    item: screen.itemLists.detail.data || {},
     stocks: screen.stockLists.detail.data || {},
     errorMessage: screen.stockLists.detail.errorMessage || '',
   }
