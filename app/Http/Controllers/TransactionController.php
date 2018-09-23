@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Item;
 use App\Models\Stock;
 use App\Models\Transaction;
 use Carbon\Carbon;
 use ExcelReport;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Validator;
@@ -349,6 +351,7 @@ class TransactionController extends Controller
             $transaction->save();
 
             $details = $request->details;
+            $error = null;
             foreach ($details as $detail) {
                 $stock = Stock::orderBy('date')
                     ->select(DB::raw('SUM(stocks.qty) as qty'))
@@ -360,7 +363,8 @@ class TransactionController extends Controller
                     ->first();
                 $qty = $detail['qty'];
                 if ($stock->qty < $qty) {
-                    return response()->json('Stock not enough.', 400);
+                    $item = Item::where('id', $detail['item_id'])->first();
+                    throw new Exception('Stock of ' . $item->name . ' not enough.');
                 }
                 $oldTrc = Stock::join('items', 'items.id', 'stocks.item_id')
                     ->orderBy('items.name', 'stocks.date')
@@ -515,9 +519,9 @@ class TransactionController extends Controller
             'remark' => 'string|nullable',
             'details.*.item_id' => 'required|exists:items,id',
             'details.*.qty' => 'required|numeric',
-            'details.*.price' => 'required|numeric',
-            'details.*.unit' => 'required',
-            'details.*.total' => 'required|numeric',
+            // 'details.*.price' => 'required|numeric',
+            // 'details.*.unit' => 'required',
+            // 'details.*.total' => 'required|numeric',
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()], 400);
@@ -542,7 +546,8 @@ class TransactionController extends Controller
                     ->first();
                 $qty = $detail['qty'];
                 if ($stock->qty < $qty) {
-                    return response()->json('Stock not enough.', 400);
+                  $item = Item::where('id', $detail['item_id'])->first();
+                  throw new Exception('Stock of ' . $item->name . ' not enough.');
                 }
                 $oldTrc = Stock::join('items', 'items.id', 'stocks.item_id')
                     ->orderBy('items.name', 'stocks.date')

@@ -4,6 +4,7 @@ import {
   fetchPost,
   fetchPatch,
   fetchDelete,
+  fetchDownload,
 } from '../actions/fetch'
 import {
   STOCK_OUT_LIST,

@@ -178,26 +178,28 @@ class StockController extends Controller
             'Kartu Stok:' => $item->name,
         ];
 
-        $queryBuilder = Item::leftJoin('stocks', 'items.id', 'stocks.item_id')
+        $queryBuilder = Item::join('stocks', 'stocks.item_id', 'items.id')
             ->selectRaw('items.id,
-            items.name,
-            items.unit,
-            stocks.number,
-            stocks.date,
-            CASE WHEN stocks.qty > 0 AND stocks.date >= ? AND stocks.date <= ? THEN stocks.qty ELSE 0 END as inQty,
-            CASE WHEN stocks.qty < 0 AND stocks.date >= ? AND stocks.date <= ? THEN ABS(stocks.qty) ELSE 0 END as outQty,
-            IFNULL((
-                SELECT SUM(cum.qty) FROM stocks as cum WHERE cum.date >= ? AND cum.date <= ? AND cum.id <= stocks.id AND cum.item_id = ?
-            ), 0) as finalQty',
-                [$dateFirst, $dateLast, $dateFirst, $dateLast, $dateFirst, $dateLast, $itemId]
+                items.name,
+                items.unit,
+                stocks.number,
+                stocks.date,
+                (CASE WHEN stocks.qty > 0 AND stocks.date >= ? AND stocks.date <= ? THEN stocks.qty ELSE 0 END) as inQty,
+                (CASE WHEN stocks.qty < 0 AND stocks.date >= ? AND stocks.date <= ? THEN ABS(stocks.qty) ELSE 0 END) as outQty,
+                (IFNULL((
+                    SELECT SUM(cum.qty) FROM stocks as cum WHERE cum.id <= stocks.id AND cum.item_id = ?
+                ), 0)) as finalQty',
+                [$dateFirst, $dateLast, $dateFirst, $dateLast, $itemId]
             )
+            ->join('transactions', 'transactions.number', 'stocks.number')
             ->where('items.id', $itemId)
             ->orderBy('stocks.date', 'ASC')
+            ->orderBy('transactions.type', 'ASC')
             ->groupBy('items.id',
                 'items.name',
                 'items.unit',
-                'stocks.id',
                 'stocks.number',
+                'stocks.id',
                 'stocks.qty',
                 'stocks.date',
                 'stocks.price'
@@ -246,8 +248,8 @@ class StockController extends Controller
 
         return Excel::create($title, function ($excel) use ($items, $title, $dateFirst, $dateLast, $columns) {
             foreach ($items as $item) {
-                $sheetName = str_replace  ("'", "", $item->name);
-                $sheetName = preg_replace ('/[^\p{L}\p{N}]/u', '_', $sheetName);
+                $sheetName = str_replace("'", "", $item->name);
+                $sheetName = preg_replace('/[^\p{L}\p{N}]/u', '_', $sheetName);
                 $excel->sheet(substr($sheetName, 0, 30), function ($sheet) use ($item, $title, $dateFirst, $dateLast, $columns) {
                     $headers = [
                         'title' => $title,
@@ -340,25 +342,28 @@ class StockController extends Controller
         $dateFirst = $request->dateFirst;
         $dateLast = $request->dateLast;
         $itemId = $request->id;
-        $stock = Item::leftJoin('stocks', 'items.id', 'stocks.item_id')
+        $stock = Item::join('stocks', 'stocks.item_id', 'items.id')
             ->selectRaw('items.id,
                 items.name,
                 items.unit,
                 stocks.number,
                 stocks.date,
-                CASE WHEN stocks.qty > 0 AND stocks.date >= ? AND stocks.date <= ? THEN stocks.qty ELSE 0 END as inQty,
-                CASE WHEN stocks.qty < 0 AND stocks.date >= ? AND stocks.date <= ? THEN ABS(stocks.qty) ELSE 0 END as outQty,
-                IFNULL((
-                    SELECT SUM(cum.qty) FROM stocks as cum WHERE cum.date >= ? AND cum.date <= ? AND cum.id <= stocks.id AND cum.item_id = ?
-                ), 0) as finalQty',
-                [$dateFirst, $dateLast, $dateFirst, $dateLast, $dateFirst, $dateLast, $itemId]
+                (CASE WHEN stocks.qty > 0 AND stocks.date >= ? AND stocks.date <= ? THEN stocks.qty ELSE 0 END) as inQty,
+                (CASE WHEN stocks.qty < 0 AND stocks.date >= ? AND stocks.date <= ? THEN ABS(stocks.qty) ELSE 0 END) as outQty,
+                (IFNULL((
+                    SELECT SUM(cum.qty) FROM stocks as cum WHERE cum.id <= stocks.id AND cum.item_id = ?
+                ), 0)) as finalQty',
+                [$dateFirst, $dateLast, $dateFirst, $dateLast, $itemId]
             )
+            ->join('transactions', 'transactions.number', 'stocks.number')
             ->where('items.id', $itemId)
+            ->orderBy('stocks.date', 'ASC')
+            ->orderBy('transactions.type', 'ASC')
             ->groupBy('items.id',
                 'items.name',
                 'items.unit',
-                'stocks.id',
                 'stocks.number',
+                'stocks.id',
                 'stocks.qty',
                 'stocks.date',
                 'stocks.price'
