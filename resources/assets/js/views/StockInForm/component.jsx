@@ -616,7 +616,7 @@ class StockInForm extends Component {
               </CardHeader>
               <CardBody>
                 <GridContainer>
-                  <GridItem xs={12} sm={12} md={6} lg={4}>
+                  <GridItem xs={12} sm={12} md={6} >
                     <CustomInput
                       labelText="Number"
                       id="number"
@@ -631,7 +631,7 @@ class StockInForm extends Component {
                       }}
                     />
                   </GridItem>
-                  <GridItem xs={12} sm={12} md={6} lg={4}>
+                  <GridItem xs={12} sm={12} md={6} >
                     <CustomInput
                       labelText="Date"
                       id="date"
@@ -649,7 +649,7 @@ class StockInForm extends Component {
                       }}
                     />
                   </GridItem>
-                  <GridItem xs={12} sm={12} md={12} lg={4}>
+                  <GridItem xs={12} sm={12} md={12} >
                     <CustomInput
                       labelText="Remark"
                       id="remark"

@@ -33,13 +33,17 @@ class TransactionController extends Controller
     {
         $page = 1;
         $perPage = 10;
+        $name = '';
         if ($request->page) {
             $page = $request->page;
         }
         if ($request->perPage) {
             $perPage = $request->perPage;
         }
-        return response()->json(Transaction::withCount('details')->where('type', 'in')->paginate($perPage, ['*'], 'page', $page), 200);
+        if ($request->name) {
+            $name = $request->name;
+        }
+        return response()->json(Transaction::withCount('details')->where('number', 'LIKE', "%$name%")->where('type', 'in')->paginate($perPage, ['*'], 'page', $page), 200);
     }
 
     /**
@@ -69,13 +73,17 @@ class TransactionController extends Controller
     {
         $page = 1;
         $perPage = 10;
+        $name = '';
         if ($request->page) {
             $page = $request->page;
         }
         if ($request->perPage) {
             $perPage = $request->perPage;
         }
-        return response()->json(Transaction::withCount('details')->where('type', 'out')->paginate($perPage, ['*'], 'page', $page), 200);
+        if ($request->name) {
+            $name = $request->name;
+        }
+        return response()->json(Transaction::withCount('details')->where('number', 'LIKE', "%$name%")->where('type', 'out')->paginate($perPage, ['*'], 'page', $page), 200);
     }
 
     /**
@@ -123,7 +131,7 @@ class TransactionController extends Controller
         $dateLast = $request->dateLast;
         $carbonFirstDate = Carbon::parse($dateFirst);
         $carbonLastDate = Carbon::parse($dateLast);
-        
+
         $title = 'DAFTAR BARANG MASUK ' . $carbonFirstDate->format('d F Y') . ' - ' . $carbonLastDate->format('d F Y');
 
         $meta = [];
@@ -166,8 +174,8 @@ class TransactionController extends Controller
             ])
             ->groupBy('Category') // Show total of value on specific group. Used with showTotal() enabled.
             ->showTotal([
-              'Quantity' => 'point',
-              'Jumlah' => 'point',
+                'Quantity' => 'point',
+                'Jumlah' => 'point',
             ])
             ->download($title);
     }
@@ -193,14 +201,17 @@ class TransactionController extends Controller
 
         $transaction = Transaction::join('transaction_details', 'transactions.id', 'transaction_details.transaction_id')
             ->join('items', 'transaction_details.item_id', 'items.id')
+            ->join('categories', 'items.category_id', 'categories.id')
             ->select('transactions.date',
                 'items.name',
+                'categories.name as category',
                 'transaction_details.unit',
                 'transaction_details.qty',
                 'transaction_details.price',
                 DB::raw('transaction_details.qty * transaction_details.price as total')
             )
             ->orderBy('transactions.date', 'ASC')
+            ->orderBy('category', 'ASC')
             ->orderBy('items.name', 'ASC')
             ->whereDate('transactions.date', '>=', $dateFirst)
             ->whereDate('transactions.date', '<=', $dateLast)
@@ -219,7 +230,7 @@ class TransactionController extends Controller
         $dateLast = $request->dateLast;
         $carbonFirstDate = Carbon::parse($dateFirst);
         $carbonLastDate = Carbon::parse($dateLast);
-        
+
         $title = 'DAFTAR BARANG KELUAR ' . $carbonFirstDate->format('d F Y') . ' - ' . $carbonLastDate->format('d F Y');
 
         $meta = [];
@@ -233,6 +244,9 @@ class TransactionController extends Controller
                 'transaction_details.unit',
                 'transaction_details.qty'
             )
+            ->orderBy('transactions.date', 'ASC')
+            ->orderBy('category', 'ASC')
+            ->orderBy('items.name', 'ASC')
             ->whereDate('transactions.date', '>=', $dateFirst)
             ->whereDate('transactions.date', '<=', $dateLast)
             ->where('transactions.type', 'out');
@@ -253,7 +267,7 @@ class TransactionController extends Controller
             ])
             ->groupBy('Category') // Show total of value on specific group. Used with showTotal() enabled.
             ->showTotal([
-              'Quantity' => 'point',
+                'Quantity' => 'point',
             ])
             ->download($title);
     }
@@ -432,7 +446,7 @@ class TransactionController extends Controller
      */
     public function stockOutShow(Transaction $transaction)
     {
-      $id = $transaction->id;
+        $id = $transaction->id;
         $trans = $transaction->with('details.item')->where([
             ['type', 'out'],
             ['id', $id],
@@ -551,8 +565,8 @@ class TransactionController extends Controller
                     ->first();
                 $qty = $detail['qty'];
                 if ($stock->qty < $qty) {
-                  $item = Item::where('id', $detail['item_id'])->first();
-                  throw new Exception('Stock of ' . $item->name . ' not enough.');
+                    $item = Item::where('id', $detail['item_id'])->first();
+                    throw new Exception('Stock of ' . $item->name . ' not enough.');
                 }
                 $oldTrc = Stock::join('items', 'items.id', 'stocks.item_id')
                     ->orderBy('items.name', 'stocks.date')
@@ -564,19 +578,19 @@ class TransactionController extends Controller
                     ->get();
                 foreach ($oldTrc as $trc) {
                     $stock = new Stock;
-                    if ($trc['qty'] < $qty) {
-                        $qty = $qty - $trc['qty'];
-                        $stock->qty = $trc['qty'] * -1;
-                        $stock->total = $trc['qty'] * $detail['price'] * -1;
+                    if ($trc->qty < $qty) {
+                        $qty = $qty - $trc->qty;
+                        $stock->qty = $trc->qty * -1;
+                        $stock->total = $trc->qty * $trc->price * -1;
                     } else {
                         $stock->qty = $qty * -1;
-                        $stock->total = $qty * $detail['price'] * -1;
+                        $stock->total = $qty * $trc->price * -1;
                         $qty = 0;
                     }
-                    $stock->number = $transaction->number;
+                    $stock->number = $request->number;
                     $stock->date = $request->date;
                     $stock->item_id = $detail['item_id'];
-                    $stock->price = $trc['price'];
+                    $stock->price = $trc->price;
                     $stock->unit = $detail['unit'];
                     $stock->save();
                     if ($qty <= 0) {

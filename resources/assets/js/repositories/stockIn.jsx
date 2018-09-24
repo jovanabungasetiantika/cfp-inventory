@@ -43,8 +43,8 @@ export const stockInIndex = (page, perPage, param) => dispatch => {
   const perPageParam = perPage ? `perPage=${perPage}` : undefined
   let allParam = [pageParam, perPageParam].filter(e => e).join('&')
   if (allParam) allParam = `?${allParam}`
-  const url = `${baseUrl}api/stock-in${allParam}`
-  return dispatch(fetchIndex(url, null, param, stockInListsType))
+  const url = `${baseUrl}api/stock-in/index${allParam}`
+  return dispatch(fetchPost(url, null, param, stockInListsType))
 }
 
 export const stockInIndexReport = (page, perPage, param) => dispatch => {

@@ -16,15 +16,19 @@ class ItemController extends Controller
      */
     public function index(Request $request)
     {
-        $page = 1;
-        $perPage = 10;
-        if ($request->page) {
-            $page = $request->page;
-        }
-        if ($request->perPage) {
-            $perPage = $request->perPage;
-        }
-        return response()->json(Item::with('category')->orderBy('updated_at', 'DESC')->paginate($perPage, ['*'], 'page', $page), 200);
+      $page = 1;
+      $perPage = 10;
+      $name = '';
+      if ($request->page) {
+          $page = $request->page;
+      }
+      if ($request->perPage) {
+          $perPage = $request->perPage;
+      }
+      if ($request->name) {
+          $name = $request->name;
+      }
+      return response()->json(Item::with('category')->where('name', 'LIKE', "%$name%")->orderBy('updated_at', 'DESC')->paginate($perPage, ['*'], 'page', $page), 200);
     }
 
     /**

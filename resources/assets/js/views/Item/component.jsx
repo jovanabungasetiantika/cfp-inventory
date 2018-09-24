@@ -34,15 +34,16 @@ class Item extends Component {
       error: '',
       perPage: 5,
       page: 1,
+      name: '',
     }
     this.getList()
   }
 
   getList = async () => {
     const { fetchIndex } = this.props
-    const { page, perPage } = this.state
+    const { page, perPage, name } = this.state
     try {
-      await fetchIndex(page, perPage)
+      await fetchIndex(page, perPage, { name })
     } catch (e) {
       this.setState({ error: 'Get list Error' })
     }
@@ -58,6 +59,10 @@ class Item extends Component {
     if (id) {
       history.push(`/item/edit/${id}`)
     }
+  }
+
+  onChange = e => {
+    this.setState({ [e.target.name]: e.target.value })
   }
 
   triggerDialog = (id, name) => {
@@ -137,7 +142,7 @@ class Item extends Component {
 
   render() {
     const { classes } = this.props;
-    const { isCreate } = this.state;
+    const { isCreate, name } = this.state;
 
     const { tableData, pagination } = this.renderTableData()
 
@@ -151,12 +156,41 @@ class Item extends Component {
               </p> */}
             </CardHeader>
             <CardBody>
-              <Button
-                color="primary"
-                onClick={this.addClick}
-              >
-                {isCreate ? 'Cancel' : 'Add New'}
-              </Button>
+              <GridContainer>
+                <GridItem xs={12} sm={12} md={4} lg={2}>
+                  <Button
+                    color="primary"
+                    onClick={this.addClick}
+                  >
+                    {isCreate ? 'Cancel' : 'Add New'}
+                  </Button>
+                </GridItem>
+                <GridItem xs={12} sm={12} md={4} lg={8}>
+                  <CustomInput
+                    labelText="Search"
+                    id="name"
+                    name="name"
+                    inputProps={{
+                      value: name,
+                      onChange: this.onChange,
+                    }}
+                    labelProps={{
+                      shrink: true,
+                    }}
+                    formControlProps={{
+                      fullWidth: true
+                    }}
+                  />
+                </GridItem>
+                <GridItem xs={12} sm={12} md={4} lg={2}>
+                  <Button
+                    color="info"
+                    onClick={this.getList}
+                  >
+                    Search
+                  </Button>
+                </GridItem>
+              </GridContainer>
               <Table
                 tableHeaderColor="primary"
                 tableHead={["No.", "Name", "Category", "Unit", "Price", "Created Date", "Action"]}

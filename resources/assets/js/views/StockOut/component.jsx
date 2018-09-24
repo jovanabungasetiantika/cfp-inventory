@@ -34,15 +34,16 @@ class StockOut extends Component {
       error: '',
       perPage: 5,
       page: 1,
+      name: '',
     }
     this.getList()
   }
 
   getList = async () => {
     const { fetchIndex } = this.props
-    const { page, perPage } = this.state
+    const { page, perPage, name } = this.state
     try {
-      await fetchIndex(page, perPage)
+      await fetchIndex(page, perPage, { name })
     } catch (e) {
       this.setState({ error: 'Get list Error' })
     }
@@ -63,6 +64,10 @@ class StockOut extends Component {
   navigateToReport = () => {
     const { history } = this.props
     history.push('/stock-out/report')
+  }
+
+  onChange = e => {
+    this.setState({ [e.target.name]: e.target.value })
   }
 
   triggerDialog = (id, name) => {
@@ -142,7 +147,7 @@ class StockOut extends Component {
 
   render() {
     const { classes } = this.props;
-    const { isCreate } = this.state;
+    const { isCreate, name } = this.state;
 
     const { tableData, pagination } = this.renderTableData()
 
@@ -151,26 +156,55 @@ class StockOut extends Component {
         <GridItem xs={12} sm={12} md={12}>
           <Card>
             <CardHeader color="primary">
-              <h4 className={classes.cardTitleWhite}>Stock Out</h4>
-              {/* <p className={classes.cardItemWhite}>
-              </p> */}
+              <h4 className={classes.cardTitleWhite}>
+                Stock Out
+              <Button
+                  color="white"
+                  onClick={this.navigateToReport}
+                  style={{
+                    float: 'right',
+                  }}
+                >
+                  Stock Out Report
+                </Button>
+              </h4>
             </CardHeader>
             <CardBody>
-              <Button
-                color="primary"
-                onClick={this.addClick}
-              >
-                {isCreate ? 'Cancel' : 'Add New'}
-              </Button>
-              <Button
-                color="primary"
-                onClick={this.navigateToReport}
-                style={{
-                  float: 'right',
-                }}
-              >
-                Stock Out Report
-              </Button>
+              <GridContainer>
+                <GridItem xs={12} sm={12} md={4} lg={2}>
+                  <Button
+                    color="primary"
+                    onClick={this.addClick}
+                  >
+                    {isCreate ? 'Cancel' : 'Add New'}
+                  </Button>
+                </GridItem>
+                <GridItem xs={12} sm={12} md={4} lg={8}>
+                  <CustomInput
+                    labelText="Search"
+                    id="name"
+                    name="name"
+                    inputProps={{
+                      value: name,
+                      onChange: this.onChange,
+                    }}
+                    labelProps={{
+                      shrink: true,
+                    }}
+                    formControlProps={{
+                      fullWidth: true
+                    }}
+                  />
+                </GridItem>
+                <GridItem xs={12} sm={12} md={4} lg={2}>
+                  <Button
+                    color="info"
+                    onClick={this.getList}
+                  >
+                    Search
+                  </Button>
+                </GridItem>
+              </GridContainer>
               <Table
                 tableHeaderColor="primary"
                 tableHead={["No.", "Number", "Remark", "Date", "Total Items In", "Created Date", "Action"]}
@@ -180,7 +214,7 @@ class StockOut extends Component {
             </CardBody>
           </Card>
         </GridItem>
-      </GridContainer>
+      </GridContainer >
     );
   }
 }

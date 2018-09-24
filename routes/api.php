@@ -40,11 +40,13 @@ Route::middleware('auth:api')->group(function () {
     });
 
     Route::prefix('item')->group(function () {
-        Route::get('/', 'ItemController@index');
+        // Route::get('/', 'ItemController@index');
 
         Route::post('/', 'ItemController@store');
 
         Route::get('/all', 'ItemController@getAll');
+
+        Route::post('/index', 'ItemController@index');
 
         Route::get('/{item}', 'ItemController@show');
 
@@ -54,9 +56,10 @@ Route::middleware('auth:api')->group(function () {
     });
 
     Route::prefix('stock-in')->group(function () {
-        Route::get('/', 'TransactionController@stockInIndex');
 
         Route::post('/', 'TransactionController@stockInStore');
+
+        Route::post('/index', 'TransactionController@stockInIndex');
 
         Route::post('/report-index', 'TransactionController@stockInReportIndex');
 
@@ -70,9 +73,10 @@ Route::middleware('auth:api')->group(function () {
     });
 
     Route::prefix('stock-out')->group(function () {
-        Route::get('/', 'TransactionController@stockOutIndex');
 
         Route::post('/', 'TransactionController@stockOutStore');
+
+        Route::post('/index', 'TransactionController@stockOutIndex');
 
         Route::post('/report-index', 'TransactionController@stockOutReportIndex');
 
@@ -107,10 +111,10 @@ Route::middleware('auth:api')->group(function () {
     });
 
     Route::prefix('stock-card')->group(function () {
-      // Route::post('/', 'StockController@detail');
+        // Route::post('/', 'StockController@detail');
 
-      Route::post('/report', 'StockController@stockReportDetailAll');
-  });
+        Route::post('/report', 'StockController@stockReportDetailAll');
+    });
 
     Route::prefix('period')->group(function () {
         Route::get('/', 'PeriodController@index');
