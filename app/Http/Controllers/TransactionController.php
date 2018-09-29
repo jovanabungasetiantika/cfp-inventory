@@ -587,7 +587,7 @@ class TransactionController extends Controller
                         $stock->total = $qty * $trc->price * -1;
                         $qty = 0;
                     }
-                    $stock->number = $request->number;
+                    $stock->number = $transaction->number;
                     $stock->date = $request->date;
                     $stock->item_id = $detail['item_id'];
                     $stock->price = $trc->price;
