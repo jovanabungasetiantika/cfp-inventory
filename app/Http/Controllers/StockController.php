@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Excel;
 use ExcelReport;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\Paginator;
 
 class StockController extends Controller
 {
@@ -28,6 +29,7 @@ class StockController extends Controller
         }
         $dateFirst = $request->dateFirst;
         $dateLast = $request->dateLast;
+        $item = $request->item;
 
         $stock = Item::leftJoin('stocks', 'items.id', 'stocks.item_id')
             ->join('categories', 'items.category_id', 'categories.id')
@@ -50,6 +52,9 @@ class StockController extends Controller
                 'categories.name',
                 'stocks.price'
             )
+            ->when($item, function ($query, $item) {
+                return $query->where('items.name', 'LIKE', "%$item%");
+            })
             ->distinct()
             ->paginate($perPage, ['*'], 'page', $page);
         return response()->json($stock, 200);
@@ -178,33 +183,93 @@ class StockController extends Controller
             'Kartu Stok:' => $item->name,
         ];
 
-        $queryBuilder = Item::join('stocks', 'stocks.item_id', 'items.id')
-            ->selectRaw('items.id,
+        $stockQuery = Stock::selectRaw('
+                ROW_NUMBER() OVER(ORDER BY stocks.date ASC, transactions.type ASC) AS row,
+                stocks.*'
+        )
+            ->join('transactions', 'transactions.number', 'stocks.number')
+            ->where('stocks.item_id', $itemId)
+            ->orderBy('stocks.date', 'ASC')
+            ->orderBy('transactions.type', 'ASC')
+            ->groupBy('stocks.id',
+                'stocks.number',
+                'stocks.item_id',
+                'stocks.qty',
+                'stocks.price',
+                'stocks.unit',
+                'stocks.total',
+                'stocks.created_at',
+                'stocks.updated_at',
+                'stocks.date');
+        $second = Item::joinSub($stockQuery, 'stocks', function ($join) {
+            $join->on('stocks.item_id', 'items.id');
+        })
+            ->selectRaw('
+                items.id,
                 items.name,
                 items.unit,
-                stocks.number,
                 stocks.date,
                 (CASE WHEN stocks.qty > 0 AND stocks.date >= ? AND stocks.date <= ? THEN stocks.qty ELSE 0 END) as inQty,
                 (CASE WHEN stocks.qty < 0 AND stocks.date >= ? AND stocks.date <= ? THEN ABS(stocks.qty) ELSE 0 END) as outQty,
                 (IFNULL((
-                    SELECT SUM(cum.qty) FROM stocks as cum WHERE cum.id <= stocks.id AND cum.item_id = ?
+                    SELECT SUM(cum.qty) FROM (
+                        SELECT
+                            ROW_NUMBER() OVER(ORDER BY stocks.date ASC, transactions.type ASC) AS row,
+                            stocks.*
+                        FROM stocks
+                        LEFT JOIN transactions ON transactions.number = stocks.number
+                        WHERE stocks.item_id = ?
+                        GROUP BY
+                            stocks.id,
+                            stocks.number,
+                            stocks.item_id,
+                            stocks.qty,
+                            stocks.price,
+                            stocks.unit,
+                            stocks.total,
+                            stocks.created_at,
+                            stocks.updated_at,
+                            stocks.date
+                        ORDER BY stocks.date ASC, transactions.type ASC
+                    ) as cum WHERE cum.row <= stocks.row
                 ), 0)) as finalQty',
                 [$dateFirst, $dateLast, $dateFirst, $dateLast, $itemId]
             )
             ->join('transactions', 'transactions.number', 'stocks.number')
             ->where('items.id', $itemId)
-            ->orderBy('stocks.date', 'ASC')
-            ->orderBy('transactions.type', 'ASC')
+            ->whereDate('stocks.date', '>=', $dateFirst)
+            ->whereDate('stocks.date', '<=', $dateLast)
             ->groupBy('items.id',
                 'items.name',
                 'items.unit',
-                'stocks.number',
+                'stocks.row',
                 'stocks.id',
                 'stocks.qty',
                 'stocks.date',
                 'stocks.price'
             )
-            ->distinct();
+            ->orderBy('stocks.date', 'ASC')
+            ->orderBy('transactions.type', 'ASC');
+        $first = Item::join('stocks', 'stocks.item_id', 'items.id')
+            ->selectRaw('
+                items.id,
+                items.name,
+                items.unit,
+                ? as date,
+                0 as inQty,
+                0 as outQty,
+                (IFNULL(SUM(stocks.qty), 0)) as finalQty',
+                [$dateFirst]
+            )
+            ->where('items.id', $itemId)
+            ->whereDate('stocks.date', '<', $dateFirst)
+            ->groupBy('items.id',
+                'items.name',
+                'items.unit'
+            );
+        $queryBuilder = $first
+            ->unionAll($second)
+            ->get();
 
         $columns = [
             'Tanggal' => 'date',
@@ -257,31 +322,93 @@ class StockController extends Controller
                             'Kartu Stok:' => $item->name,
                         ],
                     ];
-                    $query = Item::leftJoin('stocks', 'items.id', 'stocks.item_id')
-                        ->selectRaw('items.id,
+                    $stockQuery = Stock::selectRaw('
+                        ROW_NUMBER() OVER(ORDER BY stocks.date ASC, transactions.type ASC) AS row,
+                        stocks.*'
+                    )
+                        ->join('transactions', 'transactions.number', 'stocks.number')
+                        ->where('stocks.item_id', $itemId)
+                        ->orderBy('stocks.date', 'ASC')
+                        ->orderBy('transactions.type', 'ASC')
+                        ->groupBy('stocks.id',
+                            'stocks.number',
+                            'stocks.item_id',
+                            'stocks.qty',
+                            'stocks.price',
+                            'stocks.unit',
+                            'stocks.total',
+                            'stocks.created_at',
+                            'stocks.updated_at',
+                            'stocks.date');
+                    $second = Item::joinSub($stockQuery, 'stocks', function ($join) {
+                        $join->on('stocks.item_id', 'items.id');
+                    })
+                        ->selectRaw('
+                            items.id,
                             items.name,
                             items.unit,
-                            stocks.number,
                             stocks.date,
-                            CASE WHEN stocks.qty > 0 AND stocks.date >= ? AND stocks.date <= ? THEN stocks.qty ELSE 0 END as inQty,
-                            CASE WHEN stocks.qty < 0 AND stocks.date >= ? AND stocks.date <= ? THEN ABS(stocks.qty) ELSE 0 END as outQty,
-                            IFNULL((
-                                SELECT SUM(cum.qty) FROM stocks as cum WHERE cum.date >= ? AND cum.date <= ? AND cum.id <= stocks.id AND cum.item_id = ?
-                            ), 0) as finalQty',
-                            [$dateFirst, $dateLast, $dateFirst, $dateLast, $dateFirst, $dateLast, $item->id]
+                            (CASE WHEN stocks.qty > 0 AND stocks.date >= ? AND stocks.date <= ? THEN stocks.qty ELSE 0 END) as inQty,
+                            (CASE WHEN stocks.qty < 0 AND stocks.date >= ? AND stocks.date <= ? THEN ABS(stocks.qty) ELSE 0 END) as outQty,
+                            (IFNULL((
+                                SELECT SUM(cum.qty) FROM (
+                                    SELECT
+                                        ROW_NUMBER() OVER(ORDER BY stocks.date ASC, transactions.type ASC) AS row,
+                                        stocks.*
+                                    FROM stocks
+                                    LEFT JOIN transactions ON transactions.number = stocks.number
+                                    WHERE stocks.item_id = ?
+                                    GROUP BY
+                                        stocks.id,
+                                        stocks.number,
+                                        stocks.item_id,
+                                        stocks.qty,
+                                        stocks.price,
+                                        stocks.unit,
+                                        stocks.total,
+                                        stocks.created_at,
+                                        stocks.updated_at,
+                                        stocks.date
+                                    ORDER BY stocks.date ASC, transactions.type ASC
+                                ) as cum WHERE cum.row <= stocks.row
+                            ), 0)) as finalQty',
+                            [$dateFirst, $dateLast, $dateFirst, $dateLast, $itemId]
                         )
-                        ->where('items.id', $item->id)
-                        ->orderBy('stocks.date', 'ASC')
+                        ->join('transactions', 'transactions.number', 'stocks.number')
+                        ->where('items.id', $itemId)
+                        ->whereDate('stocks.date', '>=', $dateFirst)
+                        ->whereDate('stocks.date', '<=', $dateLast)
                         ->groupBy('items.id',
                             'items.name',
                             'items.unit',
+                            'stocks.row',
                             'stocks.id',
-                            'stocks.number',
                             'stocks.qty',
                             'stocks.date',
                             'stocks.price'
                         )
-                        ->distinct();
+                        ->orderBy('stocks.date', 'ASC')
+                        ->orderBy('transactions.type', 'ASC');
+                    $first = Item::join('stocks', 'stocks.item_id', 'items.id')
+                        ->selectRaw('
+                            items.id,
+                            items.name,
+                            items.unit,
+                            ? as date,
+                            0 as inQty,
+                            0 as outQty,
+                            (IFNULL(SUM(stocks.qty), 0)) as finalQty',
+                            [$dateFirst]
+                        )
+                        ->where('items.id', $itemId)
+                        ->whereDate('stocks.date', '<', $dateFirst)
+                        ->groupBy('items.id',
+                            'items.name',
+                            'items.unit'
+                        );
+                    $query = $first
+                        ->unionAll($second)
+                        ->get();
 
                     $limit = null;
                     $groupByArr = [];
@@ -342,35 +469,96 @@ class StockController extends Controller
         $dateFirst = $request->dateFirst;
         $dateLast = $request->dateLast;
         $itemId = $request->id;
-        $stock = Item::join('stocks', 'stocks.item_id', 'items.id')
-            ->selectRaw('items.id,
+        $stockQuery = Stock::selectRaw('
+                ROW_NUMBER() OVER(ORDER BY stocks.date ASC, transactions.type ASC) AS row,
+                stocks.*'
+        )
+            ->join('transactions', 'transactions.number', 'stocks.number')
+            ->where('stocks.item_id', $itemId)
+            ->orderBy('stocks.date', 'ASC')
+            ->orderBy('transactions.type', 'ASC')
+            ->groupBy('stocks.id',
+                'stocks.number',
+                'stocks.item_id',
+                'stocks.qty',
+                'stocks.price',
+                'stocks.unit',
+                'stocks.total',
+                'stocks.created_at',
+                'stocks.updated_at',
+                'stocks.date');
+        $second = Item::joinSub($stockQuery, 'stocks', function ($join) {
+            $join->on('stocks.item_id', 'items.id');
+        })
+            ->selectRaw('
+                items.id,
                 items.name,
                 items.unit,
-                stocks.number,
                 stocks.date,
                 (CASE WHEN stocks.qty > 0 AND stocks.date >= ? AND stocks.date <= ? THEN stocks.qty ELSE 0 END) as inQty,
                 (CASE WHEN stocks.qty < 0 AND stocks.date >= ? AND stocks.date <= ? THEN ABS(stocks.qty) ELSE 0 END) as outQty,
                 (IFNULL((
-                    SELECT SUM(cum.qty) FROM stocks as cum WHERE cum.id <= stocks.id AND cum.item_id = ?
+                    SELECT SUM(cum.qty) FROM (
+                        SELECT
+                            ROW_NUMBER() OVER(ORDER BY stocks.date ASC, transactions.type ASC) AS row,
+                            stocks.*
+                        FROM stocks
+                        LEFT JOIN transactions ON transactions.number = stocks.number
+                        WHERE stocks.item_id = ?
+                        GROUP BY
+                            stocks.id,
+                            stocks.number,
+                            stocks.item_id,
+                            stocks.qty,
+                            stocks.price,
+                            stocks.unit,
+                            stocks.total,
+                            stocks.created_at,
+                            stocks.updated_at,
+                            stocks.date
+                        ORDER BY stocks.date ASC, transactions.type ASC
+                    ) as cum WHERE cum.row <= stocks.row
                 ), 0)) as finalQty',
                 [$dateFirst, $dateLast, $dateFirst, $dateLast, $itemId]
             )
             ->join('transactions', 'transactions.number', 'stocks.number')
             ->where('items.id', $itemId)
-            ->orderBy('stocks.date', 'ASC')
-            ->orderBy('transactions.type', 'ASC')
+            ->whereDate('stocks.date', '>=', $dateFirst)
+            ->whereDate('stocks.date', '<=', $dateLast)
             ->groupBy('items.id',
                 'items.name',
                 'items.unit',
-                'stocks.number',
+                'stocks.row',
                 'stocks.id',
                 'stocks.qty',
                 'stocks.date',
                 'stocks.price'
             )
-            ->distinct()
-            ->paginate($perPage, ['*'], 'page', $page);
-        return response()->json($stock, 200);
+            ->orderBy('stocks.date', 'ASC')
+            ->orderBy('transactions.type', 'ASC');
+        $first = Item::join('stocks', 'stocks.item_id', 'items.id')
+            ->selectRaw('
+                items.id,
+                items.name,
+                items.unit,
+                ? as date,
+                0 as inQty,
+                0 as outQty,
+                (IFNULL(SUM(stocks.qty), 0)) as finalQty',
+                [$dateFirst]
+            )
+            ->where('items.id', $itemId)
+            ->whereDate('stocks.date', '<', $dateFirst)
+            ->groupBy('items.id',
+                'items.name',
+                'items.unit'
+            );
+        $stock = $first
+            ->unionAll($second)
+            ->get();
+        $stockSlice = array_slice($stock->toArray(), $perPage * ($page - 1), $perPage);
+        $stockPagination = new Paginator($stock, $perPage, $page);
+        return response()->json($stockPagination, 200);
     }
 
     /**

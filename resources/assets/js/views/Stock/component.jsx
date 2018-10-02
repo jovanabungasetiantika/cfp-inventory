@@ -41,15 +41,16 @@ class Stock extends Component {
       dateLast,
       perPage: 5,
       page: 1,
+      name: '',
     }
     this.getList()
   }
 
   getList = async () => {
     const { fetchIndex } = this.props
-    const { page, perPage, dateFirst, dateLast } = this.state
+    const { page, perPage, dateFirst, dateLast, name } = this.state
     try {
-      await fetchIndex(page, perPage, { dateFirst, dateLast })
+      await fetchIndex(page, perPage, { dateFirst, dateLast, item: name })
     } catch (e) {
       this.setState({ error: 'Get list Error' })
     }
@@ -127,7 +128,7 @@ class Stock extends Component {
 
   render() {
     const { classes } = this.props;
-    const { dateFirst, dateLast } = this.state;
+    const { dateFirst, dateLast, name } = this.state;
 
     const { tableData, pagination } = this.renderTableData()
 
@@ -142,41 +143,64 @@ class Stock extends Component {
             </CardHeader>
             <CardBody>
               <GridContainer>
-                <GridItem xs={12} sm={12} md={4}>
-                  <CustomInput
-                    labelText="Start Date"
-                    id="dateFirst"
-                    name="dateFirst"
-                    inputProps={{
-                      value: dateFirst,
-                      onChange: this.onChange,
-                      type: 'date',
-                    }}
-                    labelProps={{
-                      shrink: true,
-                    }}
-                    formControlProps={{
-                      fullWidth: true
-                    }}
-                  />
-                </GridItem>
-                <GridItem xs={12} sm={12} md={4}>
-                  <CustomInput
-                    labelText="End Date"
-                    id="dateLast"
-                    name="dateLast"
-                    inputProps={{
-                      value: dateLast,
-                      onChange: this.onChange,
-                      type: 'date',
-                    }}
-                    labelProps={{
-                      shrink: true,
-                    }}
-                    formControlProps={{
-                      fullWidth: true
-                    }}
-                  />
+                <GridItem xs={12} sm={12} md={8}>
+                  <GridContainer>
+                    <GridItem xs={12} sm={12} md={6}>
+                      <CustomInput
+                        labelText="Start Date"
+                        id="dateFirst"
+                        name="dateFirst"
+                        inputProps={{
+                          value: dateFirst,
+                          onChange: this.onChange,
+                          type: 'date',
+                        }}
+                        labelProps={{
+                          shrink: true,
+                        }}
+                        formControlProps={{
+                          fullWidth: true
+                        }}
+                      />
+                    </GridItem>
+                    <GridItem xs={12} sm={12} md={6}>
+                      <CustomInput
+                        labelText="End Date"
+                        id="dateLast"
+                        name="dateLast"
+                        inputProps={{
+                          value: dateLast,
+                          onChange: this.onChange,
+                          type: 'date',
+                        }}
+                        labelProps={{
+                          shrink: true,
+                        }}
+                        formControlProps={{
+                          fullWidth: true
+                        }}
+                      />
+                    </GridItem>
+                  </GridContainer>
+                  <GridContainer>
+                    <GridItem xs={12} sm={12} md={4} lg={12}>
+                      <CustomInput
+                        labelText="Search"
+                        id="name"
+                        name="name"
+                        inputProps={{
+                          value: name,
+                          onChange: this.onChange,
+                        }}
+                        labelProps={{
+                          shrink: true,
+                        }}
+                        formControlProps={{
+                          fullWidth: true
+                        }}
+                      />
+                    </GridItem>
+                  </GridContainer>
                 </GridItem>
                 <GridItem xs={12} sm={12} md={4}>
                   <Button
@@ -201,7 +225,7 @@ class Stock extends Component {
               </GridContainer>
               <Table
                 tableHeaderColor="primary"
-                tableHead={["No.", "Item Name", "Unit", "Balance Qty", "Balance Price", "In Qty", "In Price", "Out Qty", "Out Price", "Total Qty", "Total Price"]} //, "Action", "Date"
+                tableHead={["No.", "Item Name", "Unit", "Balance Qty", "Balance Price", "In Qty", "In Price/Unit", "Out Qty", "Out Price/Unit", "Total Qty", "Total Price"]} //, "Action", "Date"
                 tableData={tableData}
                 pagination={pagination}
               />
