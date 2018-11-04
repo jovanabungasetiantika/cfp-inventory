@@ -274,7 +274,8 @@ class StockController extends Controller
             );
         $queryBuilder = $first
             ->unionAll($second)
-            ->orderBy('orderQuery', 'ASC');
+            ->orderBy('orderQuery', 'ASC')
+            ->orderBy('date', 'ASC');
 
         $columns = [
             'Tanggal' => 'date',
