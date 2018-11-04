@@ -9,6 +9,7 @@ use Excel;
 use ExcelReport;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\DB;
 
 class StockController extends Controller
 {
@@ -201,13 +202,15 @@ class StockController extends Controller
                 'stocks.created_at',
                 'stocks.updated_at',
                 'stocks.date');
-        $second = Item::joinSub($stockQuery, 'stocks', function ($join) {
-            $join->on('stocks.item_id', 'items.id');
-        })
+        $second = DB::table('items AS item1')
+            ->joinSub($stockQuery, 'stocks', function ($join) {
+                $join->on('stocks.item_id', 'item1.id');
+            })
             ->selectRaw('
-                items.id,
-                items.name,
-                items.unit,
+                2 as orderQuery,
+                item1.id,
+                item1.name,
+                item1.unit,
                 stocks.date,
                 (CASE WHEN stocks.qty > 0 AND stocks.date >= ? AND stocks.date <= ? THEN stocks.qty ELSE 0 END) as inQty,
                 (CASE WHEN stocks.qty < 0 AND stocks.date >= ? AND stocks.date <= ? THEN ABS(stocks.qty) ELSE 0 END) as outQty,
@@ -236,12 +239,12 @@ class StockController extends Controller
                 [$dateFirst, $dateLast, $dateFirst, $dateLast, $itemId]
             )
             ->join('transactions', 'transactions.number', 'stocks.number')
-            ->where('items.id', $itemId)
+            ->where('item1.id', $itemId)
             ->whereDate('stocks.date', '>=', $dateFirst)
             ->whereDate('stocks.date', '<=', $dateLast)
-            ->groupBy('items.id',
-                'items.name',
-                'items.unit',
+            ->groupBy('item1.id',
+                'item1.name',
+                'item1.unit',
                 'stocks.row',
                 'stocks.id',
                 'stocks.qty',
@@ -250,26 +253,28 @@ class StockController extends Controller
             )
             ->orderBy('stocks.date', 'ASC')
             ->orderBy('transactions.type', 'ASC');
-        $first = Item::join('stocks', 'stocks.item_id', 'items.id')
+        $first = DB::table('items AS item2')
+            ->join('stocks', 'stocks.item_id', 'item2.id')
             ->selectRaw('
-                items.id,
-                items.name,
-                items.unit,
+                1 as orderQuery,
+                item2.id,
+                item2.name,
+                item2.unit,
                 ? as date,
                 0 as inQty,
                 0 as outQty,
                 (IFNULL(SUM(stocks.qty), 0)) as finalQty',
                 [$dateFirst]
             )
-            ->where('items.id', $itemId)
+            ->where('item2.id', $itemId)
             ->whereDate('stocks.date', '<', $dateFirst)
-            ->groupBy('items.id',
-                'items.name',
-                'items.unit'
+            ->groupBy('item2.id',
+                'item2.name',
+                'item2.unit'
             );
         $queryBuilder = $first
             ->unionAll($second)
-            ->get();
+            ->orderBy('orderQuery', 'ASC');
 
         $columns = [
             'Tanggal' => 'date',
