@@ -8,9 +8,9 @@ const axiosMiddlewareOptions = {
     request: [
       (state, config) => {
         const cookies = new Cookies()
-        const rajainvToken = cookies.get('rajainv') || null
-        if (rajainvToken) {
-          config.headers["Authorization"] = `Bearer ${rajainvToken.token.accessToken}`; //eslint-disable-line
+        const cfpinvToken = cookies.get('cfpinv') || null
+        if (cfpinvToken) {
+          config.headers["Authorization"] = `Bearer ${cfpinvToken.token.accessToken}`; //eslint-disable-line
         }
         return config
       },

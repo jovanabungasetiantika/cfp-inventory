@@ -52,7 +52,7 @@ export const reducer = (state = initialState, { type, payload, error }) => {
   const cookies = new Cookies()
   switch (type) {
     case LOGOUT:
-      cookies.remove('rajainv');
+      cookies.remove('cfpinv');
       return Object.assign({}, state, initialState)
     case LOGIN:
     case REGISTER:
@@ -72,13 +72,13 @@ export const reducer = (state = initialState, { type, payload, error }) => {
         },
       )
     case LOGIN_SUCCESS:
-      cookies.set('rajainv', payload.data, { path: '/', expires: Moment().add(1, 'd').toDate() });
+      cookies.set('cfpinv', payload.data, { path: '/', expires: Moment().add(1, 'd').toDate() });
       return Object.assign({}, state, { user: payload.data.user, onLoading: false })
     // case LOGOUT_SUCCESS:
-    //   cookies.set('rajainv', payload.data, { path: '/login' });
+    //   cookies.set('cfpinv', payload.data, { path: '/login' });
     //   return Object.assign({}, state, { onLoading: false })
     case REGISTER_SUCCESS:
-      cookies.set('rajainv', payload.data, { path: '/', expires: Moment().add(1, 'd').toDate() });
+      cookies.set('cfpinv', payload.data, { path: '/', expires: Moment().add(1, 'd').toDate() });
       return Object.assign({}, state, { user: payload.data.user, onLoading: false })
     case UPDATE:
     case GET_ME:

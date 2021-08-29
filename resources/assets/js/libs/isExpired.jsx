@@ -3,7 +3,7 @@ import Cookies from 'universal-cookie'
 
 const isExpired = () => {
   const cookies = new Cookies()
-  const token = cookies.get('rajainv') || null
+  const token = cookies.get('cfpinv') || null
 
   if (!token) return true
   

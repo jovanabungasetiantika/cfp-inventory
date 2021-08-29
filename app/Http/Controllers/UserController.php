@@ -19,7 +19,7 @@ class UserController extends Controller
         $field = filter_var($request->email, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
         if (Auth::attempt([$field => $request->email, 'password' => $request->password])) {
             $user = Auth::user();
-            $token = $user->createToken('rajainv');
+            $token = $user->createToken('cfpinv');
             $success['token'] = [
                 'accessToken' => $token->accessToken,
                 'created_at' => $token->token->created_at,
@@ -52,7 +52,7 @@ class UserController extends Controller
         $input = $request->all();
         $input['password'] = bcrypt($input['password']);
         $user = User::create($input);
-        $token = $user->createToken('rajainv');
+        $token = $user->createToken('cfpinv');
         $success['token'] = [
             'accessToken' => $token->accessToken,
             'created_at' => $token->token->created_at,
