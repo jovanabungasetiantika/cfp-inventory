@@ -15,7 +15,7 @@ import tableStyle from "../../assets/jss/material-dashboard-react/components/tab
 import TablePaginationActions from '../TablePaginationActions/TablePaginationAction'
 
 function CustomTable({ ...props }) {
-  const { classes, tableHead, tableData, tableHeaderColor, pagination } = props;
+  const { classes, tableHead, tableData, tableHeaderColor, pagination, isLoading } = props;
 
   const rowsPerPage = pagination ? pagination.rowsPerPage : 5
   const emptyRows = Math.max(0, rowsPerPage - tableData.length);
@@ -60,7 +60,11 @@ function CustomTable({ ...props }) {
               :
               <TableRow>
                 <TableCell className={classes.tableCell} style={{ textAlign: 'center' }} colSpan={tableHead ? tableHead.length : 1}>
-                  No data loaded.
+                  {
+                    isLoading
+                    ? 'Sedang membaca data...'
+                    : 'Tidak ada data terbaca.'
+                  }
                 </TableCell>
               </TableRow>
           }
@@ -75,6 +79,7 @@ function CustomTable({ ...props }) {
             <TableFooter>
               <TableRow>
                 <TablePagination
+                  labelRowsPerPage={'Baris per halaman'}
                   colSpan={tableHead.length}
                   count={pagination.total}
                   rowsPerPage={pagination.rowsPerPage}

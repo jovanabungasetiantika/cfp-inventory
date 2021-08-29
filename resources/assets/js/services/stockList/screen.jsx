@@ -31,12 +31,12 @@ const defaultState = (state = initialState, { type, payload, error }) => {
   let tempIdx
   switch (type) {
     case STOCK_LIST:
-      return Object.assign({}, state, initialState)
+      return Object.assign({}, state, initialState, { onLoading: true })
     case STOCK_REPORT_LIST:
     case STOCK_CARD_REPORT_LIST:
       return Object.assign({}, state, { onLoading: true, onSuccess: false, onError: false })
     case STOCK_LIST_SUCCESS:
-      return Object.assign({}, state, { data: payload.data })
+      return Object.assign({}, state, { data: payload.data, onLoading: false })
     case STOCK_LIST_FAIL:
     case STOCK_CARD_REPORT_LIST_FAIL:
     case STOCK_REPORT_LIST_FAIL:
@@ -88,9 +88,10 @@ const defaultState = (state = initialState, { type, payload, error }) => {
         },
       )
     case STOCK_DELETE_LIST:
-    case STOCK_CLEAN_FAIL:
+      case STOCK_CLEAN_FAIL:
+      return Object.assign({}, state, initialState, { data: state.data, onLoading: true })
     case STOCK_CLEAN_SUCCESS:
-      return Object.assign({}, state, initialState, { data: state.data })
+      return Object.assign({}, state, initialState, { data: state.data, onLoading: false })
     default:
       return state
   }

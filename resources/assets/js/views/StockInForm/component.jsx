@@ -5,6 +5,7 @@ import NumericLabel from 'react-pretty-numbers';
 // @material-ui/core components
 import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from "@material-ui/core/IconButton";
+import CircularProgress from "@material-ui/core/CircularProgress";
 // @material-ui/icons
 import Add from "@material-ui/icons/Add";
 import Edit from "@material-ui/icons/Edit";
@@ -314,7 +315,7 @@ class StockInForm extends Component {
   triggerDialog = (id, name) => {
     const { openDialog, fetchDelete } = this.props
     openDialog({
-      title: `Remove "${name}" from detail?`,
+      title: `Hapus "${name}" dari Detail?`,
       body: '',
       action: () => {
         this.setState({
@@ -359,7 +360,7 @@ class StockInForm extends Component {
             fullWidth: true,
             className: classes.width200,
           }}
-          placeholder="Pick item..."
+          placeholder="Pilih Produk..."
         />,
         <CustomInput
           id="price"
@@ -417,6 +418,7 @@ class StockInForm extends Component {
         <div className={classes.width75}>
           <IconButton
             aria-label="Save"
+            title="Simpan"
             className={classes.tableActionButton}
             onClick={() => this.onSave()}
           >
@@ -428,6 +430,7 @@ class StockInForm extends Component {
           </IconButton>
           <IconButton
             aria-label="Cancel"
+            title="Batal"
             className={classes.tableActionButton}
             onClick={this.toggleAdd}
           >
@@ -459,7 +462,7 @@ class StockInForm extends Component {
                 fullWidth: true,
                 className: classes.width200,
               }}
-              placeholder="Pick item..."
+              placeholder="Pilih Produk..."
             />,
             <CustomInput
               id="price"
@@ -518,6 +521,7 @@ class StockInForm extends Component {
               <div className={classes.width75}>
                 <IconButton
                   aria-label="Save"
+                  title="Simpan"
                   className={classes.tableActionButton}
                   onClick={() => { this.onSave(key) }}
                 >
@@ -529,6 +533,7 @@ class StockInForm extends Component {
                 </IconButton>
                 <IconButton
                   aria-label="Close"
+                  title="Batal"
                   className={classes.tableActionButton}
                   onClick={this.toggleEdit}
                 >
@@ -553,6 +558,7 @@ class StockInForm extends Component {
               <div>
                 <IconButton
                   aria-label="Edit"
+                  title="Ubah"
                   className={classes.tableActionButton}
                   onClick={() => this.toggleEdit(key, row)}
                 >
@@ -564,6 +570,7 @@ class StockInForm extends Component {
                 </IconButton>
                 <IconButton
                   aria-label="Close"
+                  title="Hapus"
                   className={classes.tableActionButton}
                   onClick={() => this.triggerDialog(key, row.item ? row.item.label : 'item')}
                 >
@@ -599,7 +606,7 @@ class StockInForm extends Component {
   }
 
   render() {
-    const { classes, history, items } = this.props;
+    const { classes, history, items, onLoading } = this.props;
     const { number, date, remark, isCreate } = this.state;
 
     const itemLists = items && items.length > 0 ? _.map(items, i => ({ value: i.id, label: i.name })) : []
@@ -611,14 +618,27 @@ class StockInForm extends Component {
           <form onSubmit={this.handleSubmit}>
             <Card>
               <CardHeader color="primary">
-                <h4 className={classes.cardTitleWhite}>Insert Stock In</h4>
-                <p className={classes.cardCategoryWhite}>Complete stock in detail</p>
+                <h4 className={classes.cardTitleWhite}>
+                  Input Barang Masuk
+                  {
+                    onLoading
+                    ? (
+                      <CircularProgress
+                        style={{
+                          float: 'right',
+                          color: 'white',
+                        }}
+                      />
+                    ) : null
+                  }
+                </h4>
+                <p className={classes.cardCategoryWhite}>Lengkapi Detail Barang Masuk</p>
               </CardHeader>
               <CardBody>
                 <GridContainer>
                   <GridItem xs={12} sm={12} md={6} >
                     <CustomInput
-                      labelText="Number"
+                      labelText="Nomor Resi"
                       id="number"
                       name="number"
                       inputProps={{
@@ -633,7 +653,7 @@ class StockInForm extends Component {
                   </GridItem>
                   <GridItem xs={12} sm={12} md={6} >
                     <CustomInput
-                      labelText="Date"
+                      labelText="Tanggal"
                       id="date"
                       name="date"
                       inputProps={{
@@ -651,7 +671,7 @@ class StockInForm extends Component {
                   </GridItem>
                   <GridItem xs={12} sm={12} md={12} >
                     <CustomInput
-                      labelText="Remark"
+                      labelText="Catatan"
                       id="remark"
                       name="remark"
                       inputProps={{
@@ -673,19 +693,19 @@ class StockInForm extends Component {
                       {
                         isCreate ?
                           <Button color="info" onClick={this.toggleAdd}>
-                            Cancel
+                            Batal
                             <Cancel style={{ marginLeft: '5px' }} />
                           </Button>
                           :
                           <Button color="info" onClick={this.toggleAdd}>
-                            Add Item
+                            Tambah Produk
                             <Add style={{ marginLeft: '5px' }} />
                           </Button>
                       }
                     </h5>
                     <Table
                       tableHeaderColor="primary"
-                      tableHead={["No.", "Item", "Price", "Count", "Unit", "Total Price", "Action"]}
+                      tableHead={["No.", "Produk", "Harga", "Jumlah", "Satuan", "Harga Total", ""]}
                       tableData={tableData}
                     // pagination={pagination}
                     />
@@ -693,8 +713,8 @@ class StockInForm extends Component {
                 </GridContainer>
               </CardBody>
               <CardFooter>
-                <Button onClick={() => { history.goBack() }}>Back</Button>
-                <Button color="primary" type="submit">Save</Button>
+                <Button onClick={() => { history.goBack() }}>Kembali</Button>
+                <Button color="primary" type="submit">Simpan</Button>
               </CardFooter>
             </Card>
           </form>

@@ -10,6 +10,7 @@ import Component from './component'
 import {
   authCleanSuccess as fetchCleanSuccess,
   authCleanFail as fetchCleanFail,
+  getMe as fetchDetail,
 } from '../../repositories/auth'
 
 import {
@@ -21,6 +22,11 @@ import {
   itemCleanSuccess as fetchItemCleanSuccess,
   itemCleanFail as fetchItemCleanFail,
 } from '../../repositories/item'
+
+import {
+  userCleanSuccess as fetchUserCleanSuccess,
+  userCleanFail as fetchUserCleanFail,
+} from '../../repositories/user'
 
 import {
   stockInCleanSuccess as fetchStockInCleanSuccess,
@@ -56,6 +62,8 @@ const mapStateToProps = ({ screen, services }) => {
   const categoryListSuccessMessage = screen.categoryLists.screen.errorMessage
   const itemListDetailSuccessMessage = screen.itemLists.detail.successMessage
   const itemListSuccessMessage = screen.itemLists.screen.successMessage
+  const userListDetailSuccessMessage = screen.userLists.detail.successMessage
+  const userListSuccessMessage = screen.userLists.screen.successMessage
   const stockInListSuccessMessage = screen.stockInLists.screen.successMessage
   const stockInListDetailSuccessMessage = screen.stockInLists.detail.successMessage
   const stockOutListSuccessMessage = screen.stockOutLists.screen.successMessage
@@ -115,6 +123,12 @@ const mapStateToProps = ({ screen, services }) => {
   } else if (itemListSuccessMessage) {
     successMessage = itemListSuccessMessage
     cleanFunc = 'fetchItemCleanSuccess'
+  } else if (userListDetailSuccessMessage) {
+    successMessage = userListDetailSuccessMessage
+    cleanFunc = 'fetchUserCleanSuccess'
+  } else if (userListSuccessMessage) {
+    successMessage = userListSuccessMessage
+    cleanFunc = 'fetchUserCleanSuccess'
   } else if (stockInListDetailSuccessMessage) {
     successMessage = stockInListDetailSuccessMessage
     cleanFunc = 'fetchStockInCleanSuccess'
@@ -156,6 +170,7 @@ const mapStateToProps = ({ screen, services }) => {
     isOpen,
     message,
     cleanFunc,
+    user: services.session.user,
   }
 }
 
@@ -163,6 +178,9 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   logout(...params) {
     dispatch(logout(...params))
     ownProps.history.push('/login')
+  },
+  fetchDetail(...params) {
+    return dispatch(fetchDetail(...params))
   },
   fetchCleanSuccess(...params) {
     return dispatch(fetchCleanSuccess(...params))

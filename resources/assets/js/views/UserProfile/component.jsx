@@ -2,6 +2,7 @@ import React from "react";
 // @material-ui/core components
 import withStyles from "@material-ui/core/styles/withStyles";
 import InputLabel from "@material-ui/core/InputLabel";
+import CircularProgress from "@material-ui/core/CircularProgress";
 // core components
 import GridItem from "../../components/Grid/GridItem.jsx";
 import GridContainer from "../../components/Grid/GridContainer.jsx";
@@ -65,7 +66,7 @@ class UserProfile extends React.Component {
   }
 
   render() {
-    const { classes } = this.props;
+    const { classes, onLoading } = this.props;
     const { name, email } = this.state
     return (
       <div>
@@ -73,14 +74,27 @@ class UserProfile extends React.Component {
           <GridItem xs={12} sm={12} md={8}>
             <Card>
               <CardHeader color="primary">
-                <h4 className={classes.cardTitleWhite}>Edit Profile</h4>
-                <p className={classes.cardCategoryWhite}>Complete your profile</p>
+                <h4 className={classes.cardTitleWhite}>
+                  Ubah Profil
+                  {
+                    onLoading
+                    ? (
+                      <CircularProgress
+                        style={{
+                          float: 'right',
+                          color: 'white',
+                        }}
+                      />
+                    ) : null
+                  }
+                </h4>
+                <p className={classes.cardCategoryWhite}>Lengkapi Profil</p>
               </CardHeader>
               <CardBody>
                 <GridContainer>
                   <GridItem xs={12} sm={12} md={6}>
                     <CustomInput
-                      labelText="Name"
+                      labelText="Nama"
                       id="name"
                       name="name"
                       inputProps={{
@@ -94,7 +108,7 @@ class UserProfile extends React.Component {
                   </GridItem>
                   <GridItem xs={12} sm={12} md={6}>
                     <CustomInput
-                      labelText="Email address"
+                      labelText="Alamat E-mail"
                       id="email"
                       name="email"
                       inputProps={{
@@ -110,31 +124,10 @@ class UserProfile extends React.Component {
                 </GridContainer>
               </CardBody>
               <CardFooter>
-                <Button color="primary" onClick={() => { this.doUpdate() }}>Update Profile</Button>
+                <Button color="primary" onClick={() => { this.doUpdate() }}>Simpan</Button>
               </CardFooter>
             </Card>
           </GridItem>
-          {/* <GridItem xs={12} sm={12} md={4}>
-            <Card profile>
-              <CardAvatar profile>
-                <a href="#pablo" onClick={e => e.preventDefault()}>
-                  <img src={avatar} alt="..." />
-                </a>
-              </CardAvatar>
-              <CardBody profile>
-                <h6 className={classes.cardCategory}>CEO / CO-FOUNDER</h6>
-                <h4 className={classes.cardTitle}>Alec Thompson</h4>
-                <p className={classes.description}>
-                  Don't be scared of the truth because we need to restart the
-                  human foundation in truth And I love you like Kanye loves Kanye
-                  I love Rick Owens’ bed design but the back is...
-                </p>
-                <Button color="primary" round>
-                  Follow
-                </Button>
-              </CardBody>
-            </Card>
-          </GridItem> */}
         </GridContainer>
       </div>
     );

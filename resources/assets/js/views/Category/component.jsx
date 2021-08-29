@@ -88,7 +88,7 @@ class Category extends Component {
   triggerDialog = (id, name) => {
     const { openDialog, fetchDelete } = this.props
     openDialog({
-      title: `Remove "${name}" from category?`,
+      title: `Hapus "${name}" dari Kategori?`,
       body: '',
       action: async () => {
         await fetchDelete({ id }).then(this.getList)
@@ -121,7 +121,7 @@ class Category extends Component {
         '',
         <div>
           <IconButton
-            aria-label="Save"
+            aria-label="Simpan"
             className={classes.tableActionButton}
             onClick={() => this.onSave()}
           >
@@ -132,7 +132,7 @@ class Category extends Component {
             />
           </IconButton>
           <IconButton
-            aria-label="Cancel"
+            aria-label="Batal"
             className={classes.tableActionButton}
             onClick={this.toggleAdd}
           >
@@ -169,6 +169,7 @@ class Category extends Component {
               <div>
                 <IconButton
                   aria-label="Save"
+                  title="Simpan"
                   className={classes.tableActionButton}
                   onClick={() => { this.onSave(row.id) }}
                 >
@@ -180,6 +181,7 @@ class Category extends Component {
                 </IconButton>
                 <IconButton
                   aria-label="Close"
+                  title="Batal"
                   className={classes.tableActionButton}
                   onClick={this.toggleEdit}
                 >
@@ -201,6 +203,7 @@ class Category extends Component {
               <div>
                 <IconButton
                   aria-label="Edit"
+                  title="Ubah"
                   className={classes.tableActionButton}
                   onClick={() => this.toggleEdit(row.id, row.name)}
                 >
@@ -212,6 +215,7 @@ class Category extends Component {
                 </IconButton>
                 <IconButton
                   aria-label="Close"
+                  title="Hapus"
                   className={classes.tableActionButton}
                   onClick={() => this.triggerDialog(row.id, row.name)}
                 >
@@ -247,7 +251,7 @@ class Category extends Component {
   }
 
   render() {
-    const { classes } = this.props;
+    const { classes, onLoading } = this.props;
     const { isCreate } = this.state;
 
     const { tableData, pagination } = this.renderTableData()
@@ -257,9 +261,9 @@ class Category extends Component {
         <GridItem xs={12} sm={12} md={12}>
           <Card>
             <CardHeader color="primary">
-              <h4 className={classes.cardTitleWhite}>Category</h4>
+              <h4 className={classes.cardTitleWhite}>Kategori</h4>
               <p className={classes.cardCategoryWhite}>
-                Category of items
+                Kategori dari Produk
               </p>
             </CardHeader>
             <CardBody>
@@ -267,11 +271,12 @@ class Category extends Component {
                 color="primary"
                 onClick={this.toggleAdd}
               >
-                {isCreate ? 'Cancel' : 'Add New'}
+                {isCreate ? 'Batalkan' : 'Tambah Baru'}
               </Button>
               <Table
+                isLoading={onLoading}
                 tableHeaderColor="primary"
-                tableHead={["No.", "Name", "Created Date", "Action"]}
+                tableHead={["No.", "Nama Produk", "Tanggal Input", ""]}
                 tableData={tableData}
                 pagination={pagination}
               />

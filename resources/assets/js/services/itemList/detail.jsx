@@ -31,9 +31,9 @@ const defaultState = (state = initialState, { type, payload, error }) => {
   let tempIdx
   switch (type) {
     case ITEM_DETAIL:
-      return Object.assign({}, state, initialState)
+      return Object.assign({}, state, initialState, { onLoading: true })
     case ITEM_DETAIL_SUCCESS:
-      return Object.assign({}, state, { data: payload.data })
+      return Object.assign({}, state, { data: payload.data, onLoading: false })
     case ITEM_SAVE_FAIL:
     case ITEM_DETAIL_FAIL:
     case ITEM_UPDATE_FAIL:
@@ -43,6 +43,7 @@ const defaultState = (state = initialState, { type, payload, error }) => {
         state,
         {
           onError: true,
+          onLoading: false,
           errorMessage: payload ? payload.data : error.response.data,
         },
       )
@@ -53,6 +54,7 @@ const defaultState = (state = initialState, { type, payload, error }) => {
         {
           data: payload.data,
           onSuccess: true,
+          onLoading: false,
           successMessage: 'Data has been inserted successfully.',
         },
       )
@@ -63,6 +65,7 @@ const defaultState = (state = initialState, { type, payload, error }) => {
         {
           data: payload.data,
           onSuccess: true,
+          onLoading: false,
           successMessage: 'Data has been updated successfully.',
         },
       )
@@ -73,15 +76,17 @@ const defaultState = (state = initialState, { type, payload, error }) => {
         {
           data: initialState.data,
           onSuccess: true,
+          onLoading: false,
           successMessage: 'Data has been deleted successfully.',
         },
       )
     case ITEM_SAVE:
     case ITEM_UPDATE:
     case ITEM_DELETE:
+      return Object.assign({}, state, initialState, { data: state.data, onLoading: true })
     case ITEM_CLEAN_FAIL:
     case ITEM_CLEAN_SUCCESS:
-      return Object.assign({}, state, initialState, { data: state.data })
+      return Object.assign({}, state, initialState, { data: state.data, onLoading: false })
     default:
       return state
   }

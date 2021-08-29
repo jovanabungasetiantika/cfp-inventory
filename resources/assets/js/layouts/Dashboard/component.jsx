@@ -19,7 +19,7 @@ import ResponsiveDialog from "../../components/ResponsiveDialog/ResponsiveDialog
 import dashboardRoutes from "../../routes/dashboard.jsx";
 
 import image from "../../assets/img/sidebar-2.jpg";
-import logo from "../../assets/img/reactlogo.png";
+import logo from "../../assets/img/cc-logo-1.png";
 
 import parseError from '../../libs/parseError'
 
@@ -59,6 +59,7 @@ class App extends React.Component {
   }
 
   componentDidMount() {
+    this.getUser()
     if (navigator.platform.indexOf("Win") > -1) {
       const ps = new PerfectScrollbar(this.refs.mainPanel);
     }
@@ -78,10 +79,16 @@ class App extends React.Component {
     window.removeEventListener("resize", this.resizeFunction);
   }
 
+  getUser = async () => {
+    const { fetchDetail } = this.props
+
+    await fetchDetail()
+  }
+
   doLogout = () => {
     const { openDialog, logout } = this.props
     openDialog({
-      title: 'Log out now?',
+      title: 'Log out sekarang?',
       body: '',
       action: async () => {
         await logout()
@@ -112,18 +119,20 @@ class App extends React.Component {
       isError,
       isOpen,
       message,
+      user,
       ...rest,
     } = this.props;
     return (
       <div className={classes.wrapper}>
         <Sidebar
-          logoText={"Monitoring Stock"}
+          logoText={"Inventaris CFP"}
           routes={this.visibleDashboardRoutes}
           logo={logo}
-          image={image}
+          // image={image}
+          user={user}
           handleDrawerToggle={this.handleDrawerToggle}
           open={this.state.mobileOpen}
-          color="blue"
+          color="purple"
           {...rest}
         />
         <div className={classes.mainPanel} ref="mainPanel">
@@ -133,15 +142,10 @@ class App extends React.Component {
             handleDrawerToggle={this.handleDrawerToggle}
             {...rest}
           />
-          {/* On the /maps route we want the map to be on full screen - this is not possible if the content and container classes are present because they have some paddings which would make the map smaller */}
-          {this.getRoute() ? (
-            <div className={classes.content}>
-              <div className={classes.container}>{switchRoutes}</div>
-            </div>
-          ) : (
-              <div className={classes.map}>{switchRoutes}</div>
-            )}
-          {this.getRoute() ? <Footer /> : null}
+          <div className={classes.content}>
+            <div className={classes.container}>{switchRoutes}</div>
+          </div>
+          <Footer />
           <Snackbar
             place="tc"
             color={isError ? 'danger' : 'info'}

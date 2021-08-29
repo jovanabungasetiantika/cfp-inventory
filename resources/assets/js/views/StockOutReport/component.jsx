@@ -103,7 +103,7 @@ class StockOutReport extends Component {
   }
 
   render() {
-    const { classes } = this.props;
+    const { classes, onLoading } = this.props;
     const { dateFirst, dateLast } = this.state;
 
     const { tableData, pagination } = this.renderTableData()
@@ -113,7 +113,7 @@ class StockOutReport extends Component {
         <GridItem xs={12} sm={12} md={12}>
           <Card>
             <CardHeader color="primary">
-              <h4 className={classes.cardTitleWhite}>Stock Out Report</h4>
+              <h4 className={classes.cardTitleWhite}>Laporan Barang Keluar</h4>
               {/* <p className={classes.cardItemWhite}>
               </p> */}
             </CardHeader>
@@ -121,7 +121,7 @@ class StockOutReport extends Component {
               <GridContainer>
                 <GridItem xs={12} sm={12} md={4}>
                   <CustomInput
-                    labelText="Start Date"
+                    labelText="Tanggal Awal"
                     id="dateFirst"
                     name="dateFirst"
                     inputProps={{
@@ -139,7 +139,7 @@ class StockOutReport extends Component {
                 </GridItem>
                 <GridItem xs={12} sm={12} md={4}>
                   <CustomInput
-                    labelText="End Date"
+                    labelText="Tanggal Akhir"
                     id="dateLast"
                     name="dateLast"
                     inputProps={{
@@ -157,13 +157,13 @@ class StockOutReport extends Component {
                 </GridItem>
                 <GridItem xs={12} sm={12} md={4}>
                   <Button
-                    color="primary"
+                    color="info"
                     onClick={this.getList}
                     style={{
                       marginTop: '30px',
                     }}
                   >
-                    Filter
+                    Cari
                   </Button>
                   <Button
                     color="primary"
@@ -172,13 +172,14 @@ class StockOutReport extends Component {
                       marginTop: '30px',
                     }}
                   >
-                    Generate Report
+                    Lihat Laporan
                   </Button>
                 </GridItem>
               </GridContainer>
               <Table
+                isLoading={onLoading}
                 tableHeaderColor="primary"
-                tableHead={["No.", "Date", "Item Name", "Unit", "Qty"]} //, "Action", "Date"
+                tableHead={["No.", "Tanggal", "Produk", "Satuan", "Jumlah"]} //, "Action", "Date"
                 tableData={tableData}
                 pagination={pagination}
               />

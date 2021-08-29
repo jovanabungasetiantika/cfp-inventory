@@ -73,7 +73,7 @@ const sidebarStyle = theme => ({
     textDecoration: "none",
     backgroundColor: "transparent",
     "&,&:hover": {
-      color: "#FFFFFF"
+      color: primaryColor, // "#FFFFFF"
     }
   },
   logoImage: {
@@ -148,14 +148,14 @@ const sidebarStyle = theme => ({
     marginRight: "15px",
     textAlign: "center",
     verticalAlign: "middle",
-    color: "rgba(255, 255, 255, 0.8)"
+    color: primaryColor, // "rgba(255, 255, 255, 0.8)"
   },
   itemText: {
     ...defaultFont,
     margin: "0",
     lineHeight: "30px",
     fontSize: "14px",
-    color: "#FFFFFF"
+    color: primaryColor, // "#FFFFFF"
   },
   whiteFont: {
     color: "#FFFFFF"

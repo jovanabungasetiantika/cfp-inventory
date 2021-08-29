@@ -68,7 +68,7 @@ class Item extends Component {
   triggerDialog = (id, name) => {
     const { openDialog, fetchDelete } = this.props
     openDialog({
-      title: `Remove "${name}" from item?`,
+      title: `Hapus "${name}" dari Produk?`,
       body: '',
       action: async () => {
         await fetchDelete({ id }).then(this.getList)
@@ -96,6 +96,7 @@ class Item extends Component {
             <div>
               <IconButton
                 aria-label="Edit"
+                title="Ubah"
                 className={classes.tableActionButton}
                 onClick={() => this.editClick(row.id)}
               >
@@ -107,6 +108,7 @@ class Item extends Component {
               </IconButton>
               <IconButton
                 aria-label="Close"
+                title="Hapus"
                 className={classes.tableActionButton}
                 onClick={() => this.triggerDialog(row.id, row.name)}
               >
@@ -141,7 +143,7 @@ class Item extends Component {
   }
 
   render() {
-    const { classes } = this.props;
+    const { classes, onLoading } = this.props;
     const { isCreate, name } = this.state;
 
     const { tableData, pagination } = this.renderTableData()
@@ -151,7 +153,7 @@ class Item extends Component {
         <GridItem xs={12} sm={12} md={12}>
           <Card>
             <CardHeader color="primary">
-              <h4 className={classes.cardTitleWhite}>Item</h4>
+              <h4 className={classes.cardTitleWhite}>Produk</h4>
               {/* <p className={classes.cardItemWhite}>
               </p> */}
             </CardHeader>
@@ -162,12 +164,12 @@ class Item extends Component {
                     color="primary"
                     onClick={this.addClick}
                   >
-                    {isCreate ? 'Cancel' : 'Add New'}
+                    {isCreate ? 'Batalkan' : 'Tambah Baru'}
                   </Button>
                 </GridItem>
                 <GridItem xs={12} sm={12} md={4} lg={8}>
                   <CustomInput
-                    labelText="Search"
+                    labelText="Cari Produk"
                     id="name"
                     name="name"
                     inputProps={{
@@ -187,13 +189,14 @@ class Item extends Component {
                     color="info"
                     onClick={this.getList}
                   >
-                    Search
+                    Cari
                   </Button>
                 </GridItem>
               </GridContainer>
               <Table
+                isLoading={onLoading}
                 tableHeaderColor="primary"
-                tableHead={["No.", "Name", "Category", "Unit", "Price", "Created Date", "Action"]}
+                tableHead={["No.", "Nama Produk", "Kategori", "Satuan", "Harga", "Tanggal Input", ""]}
                 tableData={tableData}
                 pagination={pagination}
               />

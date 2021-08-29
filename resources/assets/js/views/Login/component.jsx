@@ -46,41 +46,9 @@ class Login extends Component {
           <Card>
             <form onSubmit={this.doLogin}>
               <CardHeader color="primary">
-                <h4 className={classes.cardTitleWhite}>Login Aplikasi Monitoring Stock</h4>
+                <h4 className={classes.cardTitleWhite}>Login Inventaris Cattie Foodie Petshop</h4>
               </CardHeader>
               <CardBody>
-                {/* <GridContainer>
-                <GridItem xs={12} sm={12} md={5}>
-                  <CustomInput
-                    labelText="Company (disabled)"
-                    id="company-disabled"
-                    formControlProps={{
-                      fullWidth: true
-                    }}
-                    inputProps={{
-                      disabled: true
-                    }}
-                  />
-                </GridItem>
-                <GridItem xs={12} sm={12} md={3}>
-                  <CustomInput
-                    labelText="Username"
-                    id="username"
-                    formControlProps={{
-                      fullWidth: true
-                    }}
-                  />
-                </GridItem>
-                <GridItem xs={12} sm={12} md={4}>
-                  <CustomInput
-                    labelText="Email address"
-                    id="email-address"
-                    formControlProps={{
-                      fullWidth: true
-                    }}
-                  />
-                </GridItem>
-              </GridContainer> */}
                 <GridContainer noMargin>
                   <GridItem noPadding xs={12} sm={12} md={12}>
                     <CustomInput
@@ -113,63 +81,18 @@ class Login extends Component {
                     />
                   </GridItem>
                 </GridContainer>
-                {/* <GridContainer>
-                <GridItem xs={12} sm={12} md={4}>
-                  <CustomInput
-                    labelText="City"
-                    id="city"
-                    formControlProps={{
-                      fullWidth: true
-                    }}
-                  />
-                </GridItem>
-                <GridItem xs={12} sm={12} md={4}>
-                  <CustomInput
-                    labelText="Country"
-                    id="country"
-                    formControlProps={{
-                      fullWidth: true
-                    }}
-                  />
-                </GridItem>
-                <GridItem xs={12} sm={12} md={4}>
-                  <CustomInput
-                    labelText="Postal Code"
-                    id="postal-code"
-                    formControlProps={{
-                      fullWidth: true
-                    }}
-                  />
-                </GridItem>
-              </GridContainer>
-              <GridContainer>
-                <GridItem xs={12} sm={12} md={12}>
-                  <InputLabel style={{ color: "#AAAAAA" }}>About me</InputLabel>
-                  <CustomInput
-                    labelText="Lamborghini Mercy, Your chick she so thirsty, I'm in that two seat Lambo."
-                    id="about-me"
-                    formControlProps={{
-                      fullWidth: true
-                    }}
-                    inputProps={{
-                      multiline: true,
-                      rows: 5
-                    }}
-                  />
-                </GridItem>
-              </GridContainer> */}
               </CardBody>
               <CardFooter>
                 <GridContainer noMargin direction="column" alignItems="center">
                   <GridItem noPadding xs={12} sm={12} md={12}>
-                    <Button fullWidth color="primary" disabled={onLoading} type="submit">Login</Button>
+                    <Button fullWidth color="primary" disabled={onLoading} type="submit">MASUK</Button>
+                  </GridItem>
+                  {/* <GridItem noPadding xs={12} sm={12} md={12}>
+                    - ATAU -
                   </GridItem>
                   <GridItem noPadding xs={12} sm={12} md={12}>
-                    - OR -
-                </GridItem>
-                  <GridItem noPadding xs={12} sm={12} md={12}>
-                    <Button fullWidth color="info" disabled={onLoading} component={props => (<Link to="/register" {...props} />)}>Register</Button>
-                  </GridItem>
+                    <Button fullWidth color="info" disabled={onLoading} component={props => (<Link to="/register" {...props} />)}>DAFTAR</Button>
+                  </GridItem> */}
                 </GridContainer>
               </CardFooter>
             </form>

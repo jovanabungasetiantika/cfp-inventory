@@ -73,7 +73,7 @@ class StockIn extends Component {
   triggerDialog = (id, name) => {
     const { openDialog, fetchDelete } = this.props
     openDialog({
-      title: `Remove "${name}" from Stock In?`,
+      title: `Hapus "${name}" dari Barang Masuk?`,
       body: '',
       action: async () => {
         await fetchDelete({ id }).then(this.getList)
@@ -101,6 +101,7 @@ class StockIn extends Component {
             <div>
               <IconButton
                 aria-label="Edit"
+                title="Ubah"
                 className={classes.tableActionButton}
                 onClick={() => this.editClick(row.id)}
               >
@@ -112,6 +113,7 @@ class StockIn extends Component {
               </IconButton>
               <IconButton
                 aria-label="Close"
+                title="Hapus"
                 className={classes.tableActionButton}
                 onClick={() => this.triggerDialog(row.id, row.number)}
               >
@@ -146,7 +148,7 @@ class StockIn extends Component {
   }
 
   render() {
-    const { classes } = this.props;
+    const { classes, onLoading } = this.props;
     const { isCreate, name } = this.state;
 
     const { tableData, pagination } = this.renderTableData()
@@ -157,7 +159,7 @@ class StockIn extends Component {
           <Card>
             <CardHeader color="primary">
               <h4 className={classes.cardTitleWhite}>
-                Stock In
+                Barang Masuk
                 <Button
                   color="white"
                   onClick={this.navigateToReport}
@@ -165,7 +167,7 @@ class StockIn extends Component {
                     float: 'right',
                   }}
                 >
-                  Stock In Report
+                  Lihat Laporan Barang Masuk
                 </Button>
               </h4>
             </CardHeader>
@@ -176,12 +178,12 @@ class StockIn extends Component {
                     color="primary"
                     onClick={this.addClick}
                   >
-                    {isCreate ? 'Cancel' : 'Add New'}
+                    {isCreate ? 'Batalkan' : 'Tambah Baru'}
                   </Button>
                 </GridItem>
                 <GridItem xs={12} sm={12} md={4} lg={8}>
                   <CustomInput
-                    labelText="Search"
+                    labelText="Cari Barang Masuk"
                     id="name"
                     name="name"
                     inputProps={{
@@ -201,13 +203,14 @@ class StockIn extends Component {
                     color="info"
                     onClick={this.getList}
                   >
-                    Search
+                    Cari
                   </Button>
                 </GridItem>
               </GridContainer>
               <Table
+                isLoading={onLoading}
                 tableHeaderColor="primary"
-                tableHead={["No.", "Number", "Remark", "Date", "Total Items In", "Created Date", "Action"]}
+                tableHead={["No.", "Nomor Resi", "Catatan", "Tanggal", "Total Produk Masuk", "Tanggal Input", ""]}
                 tableData={tableData}
                 pagination={pagination}
               />

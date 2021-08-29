@@ -34,9 +34,9 @@ const defaultState = (state = initialState, { type, payload, error }) => {
   let tempIdx
   switch (type) {
     case STOCK_DETAIL:
-      return Object.assign({}, state, initialState)
+      return Object.assign({}, state, initialState, { onLoading: true })
     case STOCK_DETAIL_SUCCESS:
-      return Object.assign({}, state, { data: payload.data })
+      return Object.assign({}, state, { data: payload.data, onLoading: false })
     case STOCK_REPORT_DETAIL:
       return Object.assign({}, state, { onLoading: true, onSuccess: false, onError: false })
     case STOCK_SAVE_FAIL:
@@ -86,6 +86,7 @@ const defaultState = (state = initialState, { type, payload, error }) => {
         {
           data: payload.data,
           onSuccess: true,
+          onLoading: false,
           successMessage: 'Data has been inserted successfully.',
         },
       )
@@ -96,6 +97,7 @@ const defaultState = (state = initialState, { type, payload, error }) => {
         {
           data: payload.data,
           onSuccess: true,
+          onLoading: false,
           successMessage: 'Data has been updated successfully.',
         },
       )
@@ -106,15 +108,17 @@ const defaultState = (state = initialState, { type, payload, error }) => {
         {
           data: initialState.data,
           onSuccess: true,
+          onLoading: false,
           successMessage: 'Data has been deleted successfully.',
         },
       )
     case STOCK_SAVE:
     case STOCK_UPDATE:
     case STOCK_DELETE:
+      return Object.assign({}, state, initialState, { data: state.data, onLoading: true })
     case STOCK_CLEAN_FAIL:
     case STOCK_CLEAN_SUCCESS:
-      return Object.assign({}, state, initialState, { data: state.data })
+      return Object.assign({}, state, initialState, { data: state.data, onLoading: false })
     default:
       return state
   }

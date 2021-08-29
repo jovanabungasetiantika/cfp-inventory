@@ -25,9 +25,9 @@ const defaultState = (state = initialState, { type, payload, error }) => {
   let tempIdx
   switch (type) {
     case ITEM_LIST:
-      return Object.assign({}, state, initialState)
+      return Object.assign({}, state, initialState, { onLoading: true })
     case ITEM_LIST_SUCCESS:
-      return Object.assign({}, state, { data: payload.data })
+      return Object.assign({}, state, { data: payload.data, onLoading: false })
     case ITEM_LIST_FAIL:
     case ITEM_DELETE_LIST_FAIL:
       return Object.assign(
@@ -35,6 +35,7 @@ const defaultState = (state = initialState, { type, payload, error }) => {
         state,
         {
           onError: true,
+          onLoading: false,
           errorMessage: payload ? payload.data : error.response.data,
         },
       )
@@ -44,13 +45,15 @@ const defaultState = (state = initialState, { type, payload, error }) => {
         state,
         {
           onSuccess: true,
+          onLoading: false,
           successMessage: 'Data has been deleted successfully.',
         },
       )
     case ITEM_DELETE_LIST:
-    case ITEM_CLEAN_FAIL:
+      case ITEM_CLEAN_FAIL:
+      return Object.assign({}, state, initialState, { data: state.data, onLoading: true })
     case ITEM_CLEAN_SUCCESS:
-      return Object.assign({}, state, initialState, { data: state.data })
+      return Object.assign({}, state, initialState, { data: state.data, onLoading: false })
     default:
       return state
   }

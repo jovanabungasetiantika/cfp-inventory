@@ -34,9 +34,10 @@ const defaultState = (state = initialState, { type, payload, error }) => {
       return Object.assign({}, state, initialState, {
         onSuccess: state.onSuccess,
         successMessage: state.successMessage,
+        onLoading: true,
       })
     case CATEGORY_LIST_SUCCESS:
-      return Object.assign({}, state, { data: payload.data })
+      return Object.assign({}, state, { data: payload.data, onLoading: false })
     case CATEGORY_SAVE_FAIL:
     case CATEGORY_UPDATE_FAIL:
     case CATEGORY_LIST_FAIL:
@@ -46,6 +47,7 @@ const defaultState = (state = initialState, { type, payload, error }) => {
         state,
         {
           onError: true,
+          onLoading: false,
           errorMessage: payload ? payload.data : error.response.data,
         },
       )
@@ -55,6 +57,7 @@ const defaultState = (state = initialState, { type, payload, error }) => {
         state,
         {
           onSuccess: true,
+          onLoading: false,
           successMessage: 'Data has been inserted successfully.',
         },
       )
@@ -64,6 +67,7 @@ const defaultState = (state = initialState, { type, payload, error }) => {
         state,
         {
           onSuccess: true,
+          onLoading: false,
           successMessage: 'Data has been updated successfully.',
         },
       )
@@ -73,12 +77,14 @@ const defaultState = (state = initialState, { type, payload, error }) => {
         state,
         {
           onSuccess: true,
+          onLoading: false,
           successMessage: 'Data has been deleted successfully.',
         },
       )
     case CATEGORY_SAVE:
     case CATEGORY_UPDATE:
     case CATEGORY_DELETE_LIST:
+      return Object.assign({}, state, initialState, { data: state.data, onLoading: true })
     case CATEGORY_CLEAN_FAIL:
     case CATEGORY_CLEAN_SUCCESS:
       return Object.assign({}, state, initialState, { data: state.data })

@@ -31,9 +31,9 @@ const defaultState = (state = initialState, { type, payload, error }) => {
   let tempIdx
   switch (type) {
     case CATEGORY_DETAIL:
-      return Object.assign({}, state, initialState)
+      return Object.assign({}, state, initialState, { onLoading: true })
     case CATEGORY_DETAIL_SUCCESS:
-      return Object.assign({}, state, { data: payload.data })
+      return Object.assign({}, state, { data: payload.data, onLoading: false })
     // case CATEGORY_SAVE_FAIL:
     case CATEGORY_DETAIL_FAIL:
     // case CATEGORY_UPDATE_FAIL:
@@ -43,6 +43,7 @@ const defaultState = (state = initialState, { type, payload, error }) => {
         state,
         {
           onError: true,
+          onLoading: false,
           errorMessage: payload ? payload.data : error.response.data,
         },
       )
@@ -89,6 +90,7 @@ const defaultState = (state = initialState, { type, payload, error }) => {
               ...state.data.slice(tempIdx + 1),
             ],
             onSuccess: true,
+            onLoading: false,
             successMessage: 'Data has been deleted successfully.',
           },
         )
@@ -97,9 +99,10 @@ const defaultState = (state = initialState, { type, payload, error }) => {
     // case CATEGORY_SAVE:
     // case CATEGORY_UPDATE:
     case CATEGORY_DELETE:
+      return Object.assign({}, state, initialState, { data: state.data, onLoading: true })
     case CATEGORY_CLEAN_FAIL:
     case CATEGORY_CLEAN_SUCCESS:
-      return Object.assign({}, state, initialState, { data: state.data })
+      return Object.assign({}, state, initialState, { data: state.data, onLoading: false })
     default:
       return state
   }

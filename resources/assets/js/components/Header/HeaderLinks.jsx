@@ -48,7 +48,7 @@ class HeaderLinks extends React.Component {
       return;
     }
 
-    this.setState({ open: false }, () => { history.push('/user') });
+    this.setState({ open: false }, () => { history.push('/profile') });
   }
 
   logout = event => {

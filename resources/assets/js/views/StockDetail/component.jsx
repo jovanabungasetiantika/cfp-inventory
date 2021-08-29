@@ -126,7 +126,7 @@ class StockDetail extends Component {
         <GridItem xs={12} sm={12} md={12}>
           <Card>
             <CardHeader color="primary">
-              <h4 className={classes.cardTitleWhite}>Stock Card{ item && item.name ? ` ${item.name}` : null }</h4>
+              <h4 className={classes.cardTitleWhite}>Kartu Stok{ item && item.name ? ` ${item.name}` : null }</h4>
               {/* <p className={classes.cardItemWhite}>
               </p> */}
             </CardHeader>
@@ -134,7 +134,7 @@ class StockDetail extends Component {
               <GridContainer>
                 <GridItem xs={12} sm={12} md={4}>
                   <CustomInput
-                    labelText="Start Date"
+                    labelText="Tanggal Awal"
                     id="dateFirst"
                     name="dateFirst"
                     inputProps={{
@@ -152,7 +152,7 @@ class StockDetail extends Component {
                 </GridItem>
                 <GridItem xs={12} sm={12} md={4}>
                   <CustomInput
-                    labelText="End Date"
+                    labelText="Tanggal Akhir"
                     id="dateLast"
                     name="dateLast"
                     inputProps={{
@@ -170,13 +170,13 @@ class StockDetail extends Component {
                 </GridItem>
                 <GridItem xs={12} sm={12} md={4}>
                   <Button
-                    color="primary"
+                    color="info"
                     onClick={this.getList}
                     style={{
                       marginTop: '30px',
                     }}
                   >
-                    Filter
+                    Cari
                   </Button>
                   <Button
                     color="primary"
@@ -185,13 +185,13 @@ class StockDetail extends Component {
                       marginTop: '30px',
                     }}
                   >
-                    Generate Report
+                    Lihat Laporan
                   </Button>
                 </GridItem>
               </GridContainer>
               <Table
                 tableHeaderColor="primary"
-                tableHead={["No.", "Date", "Qty In", "Qty Out", "Qty Left"]} //, "Action", "Date"
+                tableHead={["No.", "Tanggal", "Jumlah Masuk", "Jumlah Keluar", "Jumlah Akhir"]} //, "Action", "Date"
                 tableData={tableData}
                 pagination={pagination}
               />

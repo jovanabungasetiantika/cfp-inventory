@@ -127,7 +127,7 @@ class Stock extends Component {
   }
 
   render() {
-    const { classes } = this.props;
+    const { classes, onLoading } = this.props;
     const { dateFirst, dateLast, name } = this.state;
 
     const { tableData, pagination } = this.renderTableData()
@@ -137,7 +137,7 @@ class Stock extends Component {
         <GridItem xs={12} sm={12} md={12}>
           <Card>
             <CardHeader color="primary">
-              <h4 className={classes.cardTitleWhite}>Stock</h4>
+              <h4 className={classes.cardTitleWhite}>Stok Opname</h4>
               {/* <p className={classes.cardItemWhite}>
               </p> */}
             </CardHeader>
@@ -147,7 +147,7 @@ class Stock extends Component {
                   <GridContainer>
                     <GridItem xs={12} sm={12} md={6}>
                       <CustomInput
-                        labelText="Start Date"
+                        labelText="Tanggal Awal"
                         id="dateFirst"
                         name="dateFirst"
                         inputProps={{
@@ -165,7 +165,7 @@ class Stock extends Component {
                     </GridItem>
                     <GridItem xs={12} sm={12} md={6}>
                       <CustomInput
-                        labelText="End Date"
+                        labelText="Tanggal Akhir"
                         id="dateLast"
                         name="dateLast"
                         inputProps={{
@@ -183,9 +183,9 @@ class Stock extends Component {
                     </GridItem>
                   </GridContainer>
                   <GridContainer>
-                    <GridItem xs={12} sm={12} md={4} lg={12}>
+                    <GridItem xs={12} sm={12} md={12} lg={12}>
                       <CustomInput
-                        labelText="Search"
+                        labelText="Cari Stok"
                         id="name"
                         name="name"
                         inputProps={{
@@ -204,28 +204,29 @@ class Stock extends Component {
                 </GridItem>
                 <GridItem xs={12} sm={12} md={4}>
                   <Button
-                    color="primary"
+                    color="info"
                     onClick={this.getList}
                   >
-                    Filter
+                    Cari
                   </Button>
                   <Button
                     color="primary"
                     onClick={this.reportGenerate}
                   >
-                    Generate Report
+                    Lihat Laporan
                   </Button>
                   <Button
                     color="primary"
                     onClick={this.reportStockCardGenerate}
                   >
-                    Generate All Stock Cards
+                    Lihat Laporan Kartu Stok
                   </Button>
                 </GridItem>
               </GridContainer>
               <Table
+                isLoading={onLoading}
                 tableHeaderColor="primary"
-                tableHead={["No.", "Item Name", "Unit", "Balance Qty", "Balance Price", "In Qty", "In Price/Unit", "Out Qty", "Out Price/Unit", "Total Qty", "Total Price"]} //, "Action", "Date"
+                tableHead={["No.", "Nama Produk", "Satuan", "Jumlah Awal", "Harga Awal", "Jumlah Masuk", "Harga Masuk/Satuan", "Jumlah Keluar", "Harga Keluar/Satuan", "Jumlah Total", "Harga Total"]} //, "Action", "Date"
                 tableData={tableData}
                 pagination={pagination}
               />

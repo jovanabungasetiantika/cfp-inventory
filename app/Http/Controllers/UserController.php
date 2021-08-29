@@ -123,9 +123,31 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(User::paginate(), 200);
+        $page = 1;
+        $perPage = 10;
+        $name = '';
+        if ($request->page) {
+            $page = $request->page;
+        }
+        if ($request->perPage) {
+            $perPage = $request->perPage;
+        }
+        if ($request->name) {
+            $name = $request->name;
+        }
+        return response()->json(User::where('name', 'LIKE', "%$name%")->orderBy('updated_at', 'DESC')->paginate($perPage, ['*'], 'page', $page), 200);
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function getAll(Request $request)
+    {
+        return response()->json(User::all(), 200);
     }
 
     /**
@@ -146,11 +168,22 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        // $User = new User;
-        // $User->name = $request->name;
-        // $User->save();
+        $validator = Validator::make($request->all(), [
+            'username' => 'requred',
+            'name' => 'required',
+            'email' => 'required|email',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+        $User = new User;
+        $User->username = $request->username;
+        $User->name = $request->name;
+        $User->password = $request->name;
+        $User->email = $request->email;
+        $User->save();
 
-        // return response()->json($User, 201);
+        return response()->json($User, 201);
     }
 
     /**
@@ -159,9 +192,10 @@ class UserController extends Controller
      * @param  \App\User  $User
      * @return \Illuminate\Http\Response
      */
-    public function show(User $User)
+    public function show(User $user)
     {
-        //
+        $id = $user->id;
+        return response()->json($user->where('id', $id)->first(), 200);
     }
 
     /**
@@ -185,12 +219,14 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $validator = Validator::make($request->all(), [
+            'username' => 'username',
             'name' => 'required',
             'email' => 'required|email',
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()], 400);
         }
+        $user->username = $request->username;
         $user->name = $request->name;
         $user->email = $request->email;
         $user->save();

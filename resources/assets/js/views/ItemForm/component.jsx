@@ -1,13 +1,7 @@
 import React, { Component } from "react";
 import _ from 'lodash';
-import Moment from 'moment';
-// @material-ui/core components
-import Tooltip from "@material-ui/core/Tooltip";
-import IconButton from "@material-ui/core/IconButton";
-// @material-ui/icons
-import Edit from "@material-ui/icons/Edit";
-import Close from "@material-ui/icons/Close";
 // core components
+import CircularProgress from "@material-ui/core/CircularProgress";
 import Autocomplete from "../../components/Autocomplete/Autocomplete.jsx";
 import Button from "../../components/CustomButtons/Button.jsx";
 import Card from "../../components/Card/Card.jsx";
@@ -101,7 +95,7 @@ class ItemForm extends Component {
   }
 
   render() {
-    const { classes, history, categories } = this.props;
+    const { classes, history, categories, onLoading } = this.props;
     const { name, category, unit, price } = this.state;
 
     const categoryList = categories && categories.length > 0 ? _.map(categories, i => ({ value: i.id, label: i.name })) : []
@@ -112,14 +106,27 @@ class ItemForm extends Component {
           <form onSubmit={this.handleSubmit}>
             <Card>
               <CardHeader color="primary">
-                <h4 className={classes.cardTitleWhite}>Insert Item</h4>
-                <p className={classes.cardCategoryWhite}>Complete item detail</p>
+                <h4 className={classes.cardTitleWhite}>
+                  Input Produk
+                  {
+                    onLoading
+                    ? (
+                      <CircularProgress
+                        style={{
+                          float: 'right',
+                          color: 'white',
+                        }}
+                      />
+                    ) : null
+                  }
+                </h4>
+                <p className={classes.cardCategoryWhite}>Lengkapi Detail Produk</p>
               </CardHeader>
               <CardBody>
                 <GridContainer>
                   <GridItem xs={12} sm={12} md={6}>
                     <CustomInput
-                      labelText="Name"
+                      labelText="Nama"
                       id="name"
                       name="name"
                       inputProps={{
@@ -134,7 +141,7 @@ class ItemForm extends Component {
                   </GridItem>
                   <GridItem xs={12} sm={12} md={6}>
                     <Autocomplete
-                      labelText="Category"
+                      labelText="Kategori"
                       id="category"
                       name="category"
                       suggestions={categoryList}
@@ -145,14 +152,14 @@ class ItemForm extends Component {
                       formControlProps={{
                         fullWidth: true
                       }}
-                      placeholder="Pick Category..."
+                      placeholder="Pilih Kategori..."
                     />
                   </GridItem>
                 </GridContainer>
                 <GridContainer>
                   <GridItem xs={12} sm={12} md={6}>
                     <CustomInput
-                      labelText="Unit"
+                      labelText="Satuan"
                       id="unit"
                       name="unit"
                       inputProps={{
@@ -166,7 +173,7 @@ class ItemForm extends Component {
                   </GridItem>
                   <GridItem xs={12} sm={12} md={6}>
                     <CustomInput
-                      labelText="Price"
+                      labelText="Harga"
                       id="price"
                       name="price"
                       inputProps={{
@@ -182,8 +189,8 @@ class ItemForm extends Component {
                 </GridContainer>
               </CardBody>
               <CardFooter>
-                <Button onClick={() => { history.goBack() }}>Back</Button>
-                <Button color="primary" type="submit">Save</Button>
+                <Button onClick={() => { history.goBack() }}>Batal</Button>
+                <Button color="primary" type="submit">Simpan</Button>
               </CardFooter>
             </Card>
           </form>

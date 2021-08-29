@@ -16,9 +16,21 @@
 // });
 
 Route::middleware('auth:api')->group(function () {
-    Route::get('/user/self', 'UserController@details');
+    Route::prefix('user')->group(function () {
+        Route::post('/', 'UserController@store');
 
-    Route::patch('/user/{user}', 'UserController@update');
+        Route::post('/index', 'UserController@index');
+        
+        Route::get('/all', 'UserController@getAll');
+
+        Route::get('/self', 'UserController@details');
+
+        Route::get('/{user}', 'UserController@show');
+
+        Route::patch('/{user}', 'UserController@update');
+
+        Route::delete('/{user}', 'UserController@destroy');
+    });
 
     Route::post('/change-password', 'UserController@changePassword');
 
